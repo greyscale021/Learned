@@ -123,6 +123,9 @@ Now, let’s talk about how to link your local repository to a remote repository
     ```bash
     git push -u origin <branch-name>  # The remote branch you are pushing your current local branch to. If doesn't exist git will create it, if already exists git will update it.
     ```
+    ```bash
+    git push --all # It will push all current local branches to the remote origin.
+    ```
 
 - **Pull the latest changes from the remote repository** (update your local repository with changes from the remote):
     ```bash
