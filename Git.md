@@ -133,7 +133,9 @@ Now, let’s talk about how to link your local repository to a remote repository
 
 - **Pull the latest changes from the remote repository** (update your local repository with changes from the remote):
     ```bash
-    git pull origin <branch-name>  # The remote branch you are pulling from.
+    git pull origin <branch-name>  # The remote branch you are pulling from.And it will land on the current local branch.
+    or git pull                    # when you already set upstream with a remote branch.
+    git pull --rebase              # It will pull and rebase with current branch.
     ```
 
 ## 6. Collaboration: Local to Remote & Remote to Local
