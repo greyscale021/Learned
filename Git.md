@@ -23,7 +23,6 @@
 
 </details>
 
-
 ## 1. Starting with Local Repository
 
 This section covers the basic commands you’ll need to initialize your own local Git repository and set it up.
@@ -64,10 +63,18 @@ Once you’ve set up your local repository, you can start tracking and saving yo
       ```bash
       git add <file>  # Stage a specific file
       ```
-
+    - Unstage one file:
+      ```base
+      git reset <file>
+      ```
+    - Unstage everything:
+      ```base
+      git reset
+      ```
 - **Commit changes** with a descriptive message:
     ```bash
     git commit -m "Describe your changes"
+    git commit -am 'message' # Commit all unstaged changes 
     ```
 
 ## 3. Advanced Features for Managing Changes
@@ -84,6 +91,27 @@ Once you’ve set up your local repository, you can start tracking and saving yo
     ```bash
     git rebase <branch-name>  # Moves the base of the current branch to <branch-name> and reapplies its commits
     ```
+
+- **Diff** (Will show the difference):
+At any moment, every file in Git lives in three possible versions:
+    - HEAD: The last commit on your current branch
+    - Staging Area: What you’ve added with git add
+    - Working Directory: What’s currently in your editor
+  ```
+  git diff # Working directory vs Staging area
+  ```
+  ```
+  git diff --staged # Staging area vs HEAD
+  ```
+  ```
+  git diff HEAD # Working vs HEAD
+  ```
+
+
+
+
+
+
 
 ## 4. Branching in Git
 
