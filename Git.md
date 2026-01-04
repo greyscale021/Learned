@@ -119,9 +119,13 @@ Now, let’s talk about how to link your local repository to a remote repository
     git remote add origin <repo-url>
     ```
 
-- **Push your code to the remote repository** (this uploads your changes):
+- **Push your code to the remote repository** (this uploads your changes as branch):
     ```bash
-    git push -u origin <branch-name>  # The remote branch you are pushing your current local branch to. If doesn't exist git will create it, if already exists git will update it.
+    git push -u origin <branch-name>
+    # Branch-name: The remote branch you are pushing your current local branch to.
+    # If exists git will update it. If doesn't exist git will create it.
+    # The -u flag will make a connection then you don't need to use it again.
+    
     ```
     ```bash
     git push --all # It will push all current local branches to the remote origin.
