@@ -97,7 +97,6 @@ At any moment, every file in Git lives in three possible versions:
     - HEAD: The last commit on your current branch
     - Staging Area: What you’ve added with git add
     - Working Directory: What’s currently in your editor
-    - .. Compares left with right
   ```
   git diff # Working directory vs Staging area
   ```
@@ -107,9 +106,12 @@ At any moment, every file in Git lives in three possible versions:
   ```
   git diff HEAD # Working vs HEAD
   ```
-  ```
-  git diff HEAD..origin/main # What changed | how to make: Local latest commit to remote repo
-  ```
+    - .. Compares left with right
+      ```
+      git diff HEAD..origin/main # What changed | how to make: Local latest commit to remote repo
+      ```
+  
+  
 
 
 
