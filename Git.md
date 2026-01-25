@@ -23,22 +23,35 @@
 
 </details>
 
+<details>
+  <summary><strong>Things to be clear</strong></summary>
+
+1. This documentary is only useful after you have finished a basic tutorial of git.
+1. Most Git commands act on your current branch by default.
+2. Terms:
+    - HEAD: The last local commit on your current branch.
+    - Staging Area: What you’ve added with git add.
+    - Working Directory: What’s currently in your editor.
+    - Current branch: The branch you are currently in.
+    
+</details>
+
 ## 1. Starting with Local Repository
 
 This section covers the basic commands you’ll need to initialize your own local Git repository and set it up.
 
-- **Set up your Git identity** (optional, but recommended before committing to keep track of who made each change):
+- **Set up your Git identity** (optional, but recommended before committing to keep track of who made each change).
     ```bash
     git config --global user.name "Your Name"
     git config --global user.email "you@example.com"
     ```
 
-- **Initialize a new Git repository** in your project folder:
+- **Initialize a new Git repository** in your project folder.
     ```bash
     git init
     ```
 
-- **Check the status of your files** (shows modified/unstaged files):
+- **Check the status of your files** (shows modified/unstaged files).
     ```bash
     git status
     ```
@@ -47,12 +60,12 @@ This section covers the basic commands you’ll need to initialize your own loca
 
 Once you’ve set up your local repository, you can start tracking and saving your changes. These commands will allow you to see which files have been modified and save those changes locally.
 
-- **View changes** (see which files have been modified):
+- **View changes** (see which files have been modified).
     ```bash
     git status
     ```
 
-- **Stage files** (prepare them for committing):
+- **Stage files** (prepare them for committing).
 
     - Stage **all changes**:
       ```bash
@@ -63,62 +76,69 @@ Once you’ve set up your local repository, you can start tracking and saving yo
       ```bash
       git add <file>  # Stage a specific file
       ```
-    - Unstage one file:
+    - Unstage **one file**:
       ```base
       git reset <file>
       ```
-    - Unstage everything:
+    - Unstage **everything**:
       ```base
       git reset
       ```
 - **Commit changes** with a descriptive message:
     ```bash
-    git commit -m "Describe your changes"
-    git commit -am 'message' # Commit all unstaged changes 
+    git commit -m "Message"
+    git commit -am "Message" # Add and Commit changes 
     ```
 
 ## 3. Advanced Features for Managing Changes
 
-- **Stashing Changes** (temporary save of changes without committing):
-    - Save your local changes without committing them, allowing you to switch branches or work on something else:
+- **Diff** (Will show the difference):
+
+    At any moment, every file in Git lives in three possible versions:
+    - HEAD: Snapshot of the last commit on your current branch.
+    - Staging Area: What you’ve added with git add.
+    - Working Directory: What’s currently in your editor.
+  ```bash
+  git diff          # Working directory vs Staging area
+  git diff --staged # Staging area vs HEAD
+  git diff HEAD     # Working vs HEAD
+  ```
+    - .. (Compares left with right)
     ```bash
-    git stash   # Save your current changes temporarily
-    git stash pop   # Retrieve the changes back after you’re done
+    git diff HEAD..origin/main # What changed | how to make: Local latest commit to remote repo
+    ```
+
+- **Stashing Changes** (restores the working directory to match HEAD):
+    - Save your local changes (Working directory and staged area's)  without committing them, allowing you to switch branches or work on something else:
+    ```bash
+    git stash   # Save your local changes temporarily
+    git stash pop   # Retrieve the changes back after you’re done (apply then deletes stash)
+    git stash apply # Apply only, stash stays
     ```
 
 - **Rebasing** (reapply changes from one branch onto another):
     - Useful for cleaning up commit history and integrating changes more smoothly:
     ```bash
-    git rebase <branch-name>  # Moves the base of the current branch to <branch-name> and reapplies its commits
+    git rebase <branch-name>  
+    # Take the current branch’s commits and replay them on top of <branch-name>.
+    # main:       A — B — C
+    # feature:    A — B — D — E
+    # after "git rebase main"(feature): feature: A — B — C — D — E
     ```
-
-- **Diff** (Will show the difference):
-At any moment, every file in Git lives in three possible versions:
-    - HEAD: The last commit on your current branch
-    - Staging Area: What you’ve added with git add
-    - Working Directory: What’s currently in your editor
-  ```
-  git diff # Working directory vs Staging area
-  ```
-  ```
-  git diff --staged # Staging area vs HEAD
-  ```
-  ```
-  git diff HEAD # Working vs HEAD
-  ```
-    - .. Compares left with right
-      ```
-      git diff HEAD..origin/main # What changed | how to make: Local latest commit to remote repo
-      ```
-  
-  
-
-
-
-
-
-
-
+    ```bash
+    git rebase -i <branch-name>  # i stands for interactive, by using this we can edit(editing, squashing, reordering or deleting commits) the commit history.
+    ```
+    ```bash
+    git pull --rebase # Fetches the latest commits from the remote branch and then reapply my local commits on top of them, instead of creating a merge commit.
+    ```
+- Good practice in pro workflow: Reason being when collaborating rebase can cause history confusion among different contriburtors.
+    ```bash
+    git fetch
+    git diff HEAD..origin/main
+    git stash            # If you have uncommitted work
+    git pull --rebase
+    git stash pop       
+    ```
 ## 4. Branching in Git
 
 Branching allows you to work on separate features or fixes in your codebase without affecting the main branch. This is crucial when working on multiple tasks simultaneously.
@@ -183,7 +203,7 @@ Once your local repository is linked to a remote, you will work with others to p
 
 - **Fetch changes from the remote repository** (without merging them immediately):
     ```bash
-    git fetch origin
+    git fetch origin # Fetch: Updating your local remote head.
     ```
 
 - **Pull the latest changes** (this downloads and merges remote changes into your local branch):
