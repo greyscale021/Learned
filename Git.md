@@ -7,10 +7,9 @@
 2. [Tracking Changes in Your Local Repo](#2-tracking-changes-in-your-local-repo)
 3. [Advanced Features for Managing Changes](#3-advanced-features-for-managing-changes)
 4. [Branching in Git](#4-branching-in-git)
-5. [Connecting to a Remote Repository](#5-connecting-to-a-remote-repository)
-6. [Collaboration: Local to Remote & Remote to Local](#6-collaboration-local-to-remote--remote-to-local)
-7. [Reverting or Resetting Changes](#7-reverting-or-resetting-changes)
-8. [Git Log & History](#8-git-log--history)
+5. [Remote repository](#5-remote-repository)
+6. [Reverting or Resetting Changes](#6-reverting-or-resetting-changes)
+7. [Git Log & History](#7-git-log--history)
 
 </details>
 
@@ -33,6 +32,7 @@
     - Staging Area: What you’ve added with git add.
     - Working Directory: What’s currently in your editor.
     - Current branch: The branch you are currently in.
+    - Tracked file: The files that were atleast once added or commited
     
 </details>
 
@@ -78,11 +78,11 @@ Once you’ve set up your local repository, you can start tracking and saving yo
       ```
     - Unstage **one file**:
       ```base
-      git reset <file>
+      git restore --staged <file-name>
       ```
     - Unstage **everything**:
       ```base
-      git reset
+      git restore --staged .
       ```
 - **Commit changes** with a descriptive message:
     ```bash
@@ -103,17 +103,20 @@ Once you’ve set up your local repository, you can start tracking and saving yo
   git diff --staged # Staging area vs HEAD
   git diff HEAD     # Working vs HEAD
   ```
-    - .. (Compares left with right)
+    - .. (Compares left with right): Shows differences between left and right (from left’s perspective).
     ```bash
-    git diff HEAD..origin/main # What changed | how to make: Local latest commit to remote repo
+    git diff left..right # Left vs right
+    git diff HEAD..origin/main # How to turn the local head into origin main/remote repo. HEAD vs origin/main
     ```
 
-- **Stashing Changes** (restores the working directory to match HEAD):
-    - Save your local changes (Working directory and staged area's)  without committing them, allowing you to switch branches or work on something else:
+- **Stashing Changes**:
+    - Stash saves **tracked local changes** (files that have  been added or committed at least once) 
+    and resets all **tracked files** in the working directory and staging area to match `HEAD`, 
+    allowing you to switch branches or work on something else.
     ```bash
-    git stash   # Save your local changes temporarily
-    git stash pop   # Retrieve the changes back after you’re done (apply then deletes stash)
-    git stash apply # Apply only, stash stays
+    git stash   # Saves tracked changes and resets working directory and staging to match HEAD
+    git stash pop   # Re-applies the changes from stash and deletes that stash
+    git stash apply # Re-applies the changes from stash, but keeps the stash for later
     ```
 
 - **Rebasing** (reapply changes from one branch onto another):
@@ -161,82 +164,84 @@ Branching allows you to work on separate features or fixes in your codebase with
 
 - **Merge a branch into the current branch**:
     ```bash
-    git merge <branch-name> # With which the current branch would merge
+    git merge <branch-name> # The current branch would merge with <branch-name> and update itself
     ```
 
-## 5. Connecting to a Remote Repository
+## 5. Remote repository
 
-Now, let’s talk about how to link your local repository to a remote repository, like GitHub, GitLab, etc. This allows you to share your work with others or back it up.
+We can connect our local repo to a Remote repository like GitHub, GitLab, etc. This allows a central hub to work from, or say collaborating with others.
 
-- **Link your local repository to a remote** (GitHub, GitLab, etc.):
+- **Connect your local repository to a remote hub** (GitHub, GitLab, etc.):
     ```bash
     git remote add origin <repo-url>
+    git branch --set-upstream-to=origin/main # It will set the current branch upstream to the origin/main without pushing
     ```
-
-- **Push your code to the remote repository** (this uploads your changes as branch):
+- Or, **Clone** (download) a remote repo to local:
     ```bash
-    git push -u origin <branch-name>
-    # It will push your current local branch to remote as <branch-name>.
-    # If exists git will update it. If doesn't exist git will create it.
-    # The -u flag will make a connection then you don't need to use it again.
+    git clone <repo-url> # Downloads the repo to the current directory
+    ```
+- **Push** (Upload) your code to the remote repository (this uploads your changes as branch):
+    ```bash
+    git push -u origin <branch-name> 
+    # Pushes your current local branch to remote as <branch-name>.
+    # If the branch exists git will update it. If it doesn't exists git will create it.
+    # After setting -u(upstream) with this flag, you can just use push or pull directly
     
     ```
     ```bash
-    git push --all # It will push all current local branches to the remote origin.
+    git push --all # Pushes all current local branches to the remote origin. Each branch will be created/updated as needed.
     ```
-
-- **Pull the latest changes from the remote repository** (update your local repository with changes from the remote):
+- **Fetch** (Retrieve changes from remote without changing your local branches):
     ```bash
-    git pull origin <branch-name>  # The remote branch you are pulling from.And it will land on the current local branch.
-    or git pull                    # when you already set upstream with a remote branch.
-    git pull --rebase              # It will pull and rebase with current branch.
+    git fetch origin # Updates your local remote head(origin/main).
     ```
-
-## 6. Collaboration: Local to Remote & Remote to Local
-
-Once your local repository is linked to a remote, you will work with others to push and pull changes.
-
-- **Push your local changes to the remote**:
+- **Pull** (Update) the latest changes from the remote repository (update your local repository with changes from the remote):
     ```bash
-    git push origin <branch-name>
+    git pull origin <branch-name>  # Pulls(fetch+merge) changes from remote <branch-name> to local current branch.
     ```
-
-- **Fetch changes from the remote repository** (without merging them immediately):
     ```bash
-    git fetch origin # Fetch: Updating your local remote head.
+    git pull # If you already set upstream for the current branch.
     ```
-
-- **Pull the latest changes** (this downloads and merges remote changes into your local branch):
     ```bash
-    git pull origin <branch-name>
+    git pull --rebase # Fetches the latest commits from the remote branch, then re-applies the local commits on top of them, instead of creating a merge commit.
     ```
 
-## 7. Reverting or Resetting Changes
+## 6. Reverting or Resetting Changes
 
 Sometimes, you need to **undo** or **reset** changes either locally or even specific commits. This section deals with undoing mistakes and managing your commits effectively.
 
-- **Revert a file to the state of the last commit** (removes changes made locally):
+- **Restore**: Undo(reset to HEAD) local edits:
     ```bash
-    git restore <file>
+    git restore <file-name> # Undo ustaged changes of <file-name>.
+    git restore . # Undo all ustaged changes
     ```
-
-- **Unstage a file** (removes the file from the staging area):
     ```bash
-    git reset HEAD <file>
+    git restore --staged <file-name> # Unstage staged changes of <file-name>
+    git restore --staged . # Unstage all staged changes of <file-name>
     ```
-
-- **Revert a commit** (this creates a new commit that undoes a previous commit):
     ```bash
-    git revert <commit-id>
+    git restore --staged --worktree file.txt # Undo both working directory and staging changes of <file-name>
+    git restore --staged --worktree . # Undo both working directory and staging changes.
     ```
-
-- **Reset your working directory and index** (this can remove or unstage changes, or reset the commit history):
+- **Reset**: An old and versitile cmd.
     ```bash
-    git reset --hard <commit-id>   # Reset working directory and commit history
-    git reset <commit-id>          # Soft reset, keeps changes in the working directory
+    git reset <file> #Unstages <file> (staging → match HEAD)
+    git reset . # Unstages all
     ```
-
-## 8. Git Log & History
+    ```bash
+    git reset --soft <commit> # Moves HEAD to <commit> but keeps staging & working dir
+    ```
+    ```bash
+    git reset --mixed <commit> # Moves HEAD to <commit>, resets staging to match commit, working dir untouched
+    ```
+    ```bash
+    git reset --hard <commit> # Moves HEAD to <commit>, resets staging & working dir to match commit
+    ```
+- **Revert**: Undo a commit safely by creating a new commit that reverses its changes.
+    ```bash
+    git revert <commit> # revert commit
+    ```
+## 7. Git Log & History
 
 Viewing the history of commits allows you to track changes over time.
 
@@ -247,5 +252,17 @@ Viewing the history of commits allows you to track changes over time.
 
 - **View specific commits with details**:
     ```bash
-    git log --oneline  # Shows commit IDs and messages in one line
+    git log --oneline  # Shows commit IDs and messages in one line, sort order: newest to oldest
+    ```
+    ```bash
+    git show <commit-hash> # Inspect one specific commit deeply.
+    ```
+
+- Move to commit:
+    ```bash
+    git switch --detach <commit-hash> # Will open in detached head stage.
+    git checkout <commit-hash> # Old way
+    ```
+    ```bash
+    git switch -c <new-branch-name> <commit-hash>
     ```
