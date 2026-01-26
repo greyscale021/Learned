@@ -100,7 +100,11 @@ Once you’ve set up your local repository, you can start tracking and saving yo
     - Working Directory: What’s currently in your editor.
   ```bash
   git diff          # Working directory vs Staging area
+  ```
+  ```bash
   git diff --staged # Staging area vs HEAD
+  ```
+  ```bash
   git diff HEAD     # Working vs HEAD
   ```
     - .. (Compares left with right): Shows differences between left and right (from left’s perspective).
@@ -115,7 +119,11 @@ Once you’ve set up your local repository, you can start tracking and saving yo
     allowing you to switch branches or work on something else.
     ```bash
     git stash   # Saves tracked changes and resets working directory and staging to match HEAD
+    ```
+    ```bash
     git stash pop   # Re-applies the changes from stash and deletes that stash
+    ```
+    ```bash
     git stash apply # Re-applies the changes from stash, but keeps the stash for later
     ```
 
