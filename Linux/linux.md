@@ -49,8 +49,6 @@ cd /home/user/Documents # Absolute Path (full path from root)
 cd Documents            # Relative Path (from current directory)
 ```
 
-
-
 ### `tree` (if installed)
 
 ```bash
@@ -63,13 +61,14 @@ tree # Displays directory structure visually.
 ```bash
 find . -name "file.txt" # Search for files.
 # Structure: find [starting-point] [expression]
-# Starting-pont: . current working directory, / root, ~ home.
+# Starting-point: . current working directory, / root, ~ home.
 ```
 
 ### `locate`
 
 ```bash
 locate filename # Fast file search (uses an indexed database).
+sudo updatedb # to update the database for 'locate'
 ```
 
 ### `stat` (Status)
@@ -89,10 +88,41 @@ realpath file.txt # Shows the full absolute path of a file.
 ### `clear`
 
 ```bash
-clear #Clears the terminal screen. Shortcut- (Ctrl + L)
+clear # Clears the terminal screen. Shortcut- (Ctrl + L)
+```
+### `pushd` (push directory) | `popd` (pop directory)
+```bash
+pushd <direcotry> # Moves to <direcotry> and saves previous directory onto a stack
+popd # Pops the top directory from the stack and moves you there (LIFO)
+dirs # Displays the current directory stack
+```
+---
+## Command related tools :)
+
+### `whatis`
+```bash
+whatis <command> # Shows what does this command do in one sentence
 ```
 
+### `type`
+```bash
+type <command> # Shows what kind of command is this
+```
 
+### `which`
+```bash
+which <command> # Shows the exact executable that will run when you type a command
+```
+
+### `whereis`
+```bash
+whereis <command> # Shows all known locations of a command
+```
+
+### `man` (Manual)
+```bash
+man <command> # opens the official manual for <command>
+```
 
 ## Special Navigation Symbols
 
@@ -113,9 +143,15 @@ cd ~/Downloads # Home directory/Downloads
 ### Important Directories
 
 - `/home` → User directories  
-- `/etc` → System configuration files  
+- `/etc`  → System configuration files  
 - `/var/log` → System logs  
-- `/bin` → Core command binaries  
-- `/usr` → Installed applications and libraries  
+- `/bin`  → Core command binaries  
+- `/usr`  → Installed applications and libraries
+- `/root` → Root user’s home
+- `/tmp`  → Temporary files
+- `/dev`  → Devices
+- `/proc` → Running process info (virtual filesystem)
+- `/opt`  → Optional software
+- `/lib` → Essential shared libraries
 
 ---
