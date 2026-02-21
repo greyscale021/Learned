@@ -1,22 +1,23 @@
+# Linux
+
 <details>
     <summary><strong>Index</strong></summary>
 
-1. ## [Core linux naviagation commands](#core-linux-navigation-commands)
-2. ## []()
+1. [Linux navigation](#core-linux-navigation-commands)
+2. []()
 </details>
 
 ## Core Linux Navigation Commands
 
 These are the fundamental commands you must master to navigate Linux confidently.
 
----
 
 ### 1. `pwd` (Print Working Directory)
 
 ```bash
 pwd # Shows your current location in the filesystem.
 ```
----
+
 
 ### 2️. `ls` (List)
 
@@ -30,7 +31,6 @@ ls -R   # Recursive (shows subdirectories)
 ls -lah # long format, hidden, human readable
 ```
 
----
 
 ### 3️. `cd` (Change directory)
 
@@ -48,7 +48,7 @@ We can define paths as two types:
 cd /home/user/Documents # Absolute Path (full path from root)
 cd Documents            # Relative Path (from current directory)
 ```
----
+
 
 
 ### 4. `tree` (if installed)
@@ -57,7 +57,6 @@ cd Documents            # Relative Path (from current directory)
 tree # Displays directory structure visually.
 ```
 
----
 
 ### 5. `find`
 
@@ -66,28 +65,26 @@ find . -name "file.txt" # Search for files.
 # Structure: find [starting-point] [expression]
 # Starting-pont: . current working directory, / root, ~ home.
 ```
----
 
 ### 6. `locate`
 
 ```bash
 locate filename # Fast file search (uses an indexed database).
 ```
----
 
 ### 7. `stat` (Status)
 
 ```bash
 stat filename # Shows detailed file information(size, permissions, ownership, access)
 ```
----
+
 
 ### 8. `realpath`
 
 ```bash
 realpath file.txt # Shows the full absolute path of a file.
 ```
----
+
 
 ### 9. `clear`
 
@@ -95,7 +92,7 @@ realpath file.txt # Shows the full absolute path of a file.
 clear #Clears the terminal screen. Shortcut- (Ctrl + L)
 ```
 
----
+
 
 ## Special Navigation Symbols
 
