@@ -7,19 +7,19 @@
 2. []()
 </details>
 
-## Core Linux Navigation Commands
+## 1. Core Linux Navigation Commands
 
 These are the fundamental commands you must master to navigate Linux confidently.
 
 
-### 1. `pwd` (Print Working Directory)
+###  `pwd` (Print Working Directory)
 
 ```bash
 pwd # Shows your current location in the filesystem.
 ```
 
 
-### 2️. `ls` (List)
+### `ls` (List)
 
 ```bash
 ls      # Lists files in the current directory.
@@ -32,7 +32,7 @@ ls -lah # long format, hidden, human readable
 ```
 
 
-### 3️. `cd` (Change directory)
+### `cd` (Change directory)
 
 ```bash
 cd <foldername> # Change directory to <foldername>
@@ -51,14 +51,14 @@ cd Documents            # Relative Path (from current directory)
 
 
 
-### 4. `tree` (if installed)
+### `tree` (if installed)
 
 ```bash
 tree # Displays directory structure visually.
 ```
 
 
-### 5. `find`
+### `find`
 
 ```bash
 find . -name "file.txt" # Search for files.
@@ -66,27 +66,27 @@ find . -name "file.txt" # Search for files.
 # Starting-pont: . current working directory, / root, ~ home.
 ```
 
-### 6. `locate`
+### `locate`
 
 ```bash
 locate filename # Fast file search (uses an indexed database).
 ```
 
-### 7. `stat` (Status)
+### `stat` (Status)
 
 ```bash
 stat filename # Shows detailed file information(size, permissions, ownership, access)
 ```
 
 
-### 8. `realpath`
+### `realpath`
 
 ```bash
 realpath file.txt # Shows the full absolute path of a file.
 ```
 
 
-### 9. `clear`
+### `clear`
 
 ```bash
 clear #Clears the terminal screen. Shortcut- (Ctrl + L)
