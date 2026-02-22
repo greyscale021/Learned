@@ -4,12 +4,12 @@
     <summary><strong>Index</strong></summary>
 
 1. [Linux navigation](#core-linux-navigation-commands)
-2. []()
+2. [File management](#2-file-management-basics)
 </details>
 
 ## 1. Core Linux Navigation Commands
 
-These are the fundamental commands you must master to navigate Linux confidently.
+These are the fundamental commands navigate in Linux.
 
 
 ###  `pwd` (Print Working Directory)
@@ -96,6 +96,23 @@ pushd <direcotry> # Moves to <direcotry> and saves previous directory onto a sta
 popd # Pops the top directory from the stack and moves you there (LIFO)
 dirs # Displays the current directory stack
 ```
+
+## Special Navigation Symbols
+
+| Symbol | Meaning |
+|--------|----------|
+| `.`    | Current directory |
+| `..`   | Parent directory |
+| `~`    | Home directory |
+| `/`    | Root directory |
+
+ Examples:
+```bash
+cd ../.. # Go back two levels
+cd ~/Downloads # Home directory/Downloads
+./script.sh # Runs script from current directory
+```
+
 ---
 ## Command related tools :)
 
@@ -124,21 +141,12 @@ whereis <command> # Shows all known locations of a command
 man <command> # opens the official manual for <command>
 ```
 
-## Special Navigation Symbols
+## Special Command Symbols
 
 | Symbol | Meaning |
 |--------|----------|
-| `.`    | Current directory |
-| `..`   | Parent directory |
-| `~`    | Home directory |
-| `/`    | Root directory |
+| `&&`    | Can stack multiple commands with it |
 
- Examples:
-```bash
-cd ../.. # Go back two levels
-cd ~/Downloads # Home directory/Downloads
-./script.sh # Runs script from current directory
-```
 ---
 ### Important Directories
 
@@ -155,3 +163,51 @@ cd ~/Downloads # Home directory/Downloads
 - `/lib` → Essential shared libraries
 
 ---
+
+## 2. File Management Basics
+
+These commands allow you to create, modify, copy, move, and delete files and directories.
+
+---
+
+### `touch` (Create File)
+
+```bash
+touch <file> # Creates an empty file
+```
+
+### `mkdir` (Make directory)
+```bash
+mkdir <foldername>  # Creates a directory
+mkdir <dir1> <dir2>     # Creates multiple directories
+mkdir -p a/b/c      # Creates nested directories | -p stands for parent
+```
+### `rm` (Remove)
+```bash
+rm <file>           # Deletes a file
+rm -r foldername    # Deletes a directory recursively (with everything in it)
+rm -f filename.txt  # Force delete
+rm -rf foldername   # Force delete directory recursively
+```
+### `cp` (Copy)
+```bash
+cp <source> <destination>  # Copy from source to destination
+cp -r folder1 folder2   # Copy directory recursively
+```
+### `mv` (Move / Rename)
+```bash
+mv <source> <destination>  # Move from source to destination
+mv file.txt newname.txt # It can be used as renaming tool
+```
+### `` ()
+```bash
+
+```
+### `` ()
+```bash
+
+```
+### `` ()
+```bash
+
+```
