@@ -5,6 +5,12 @@
 
 1. [Linux navigation](#core-linux-navigation-commands)
 2. [File management](#2-file-management-basics)
+3. [Permissions & ownership]()
+4. [Shell Redirection & Operators](#4shell-redirection--control-operators)
+5. []()
+5. []()
+5. []()
+5. []()
 </details>
 
 ## 1. Core Linux Navigation Commands
@@ -97,22 +103,6 @@ popd # Pops the top directory from the stack and moves you there (LIFO)
 dirs # Displays the current directory stack
 ```
 
-## Special Navigation Symbols
-
-| Symbol | Meaning |
-|--------|----------|
-| `.`    | Current directory |
-| `..`   | Parent directory |
-| `~`    | Home directory |
-| `/`    | Root directory |
-
- Examples:
-```bash
-cd ../.. # Go back two levels
-cd ~/Downloads # Home directory/Downloads
-./script.sh # Runs script from current directory
-```
-
 ---
 ## Command related tools :)
 
@@ -140,13 +130,6 @@ whereis <command> # Shows all known locations of a command
 ```bash
 man <command> # opens the official manual for <command>
 ```
-
-## Special Command Symbols
-
-| Symbol | Meaning |
-|--------|----------|
-| `&&`    | Can stack multiple commands with it |
-
 ---
 ### Important Directories
 
@@ -179,7 +162,7 @@ touch <file> # Creates an empty file
 ### `mkdir` (Make directory)
 ```bash
 mkdir <foldername>  # Creates a directory
-mkdir <dir1> <dir2>     # Creates multiple directories
+mkdir <dir1> <dir2> # Creates multiple directories
 mkdir -p a/b/c      # Creates nested directories | -p stands for parent
 ```
 ### `rm` (Remove)
@@ -199,9 +182,10 @@ cp -r folder1 folder2   # Copy directory recursively
 mv <source> <destination>  # Move from source to destination
 mv file.txt newname.txt # It can be used as renaming tool
 ```
-### `` ()
+### `cat` (Display / Concatenate)
 ```bash
-
+cat <file>  # Display content
+cat <file>> combined    # Concatenate files
 ```
 ### `` ()
 ```bash
@@ -210,4 +194,66 @@ mv file.txt newname.txt # It can be used as renaming tool
 ### `` ()
 ```bash
 
+```
+
+
+## 4.Shell Redirection & Control Operators
+
+
+These operators control:
+
+- Data flow (where output goes)
+- Execution flow (when commands run)
+
+Linux commands communicate using:
+- stdin  (standard input)
+- stdout (standard output)
+- stderr (standard error)
+
+### Redirection Operators (Data → File)
+
+`>` (Redirect stdout — overwrite)
+```bash
+echo "hello" > file.txt # take the output of echo and overwrite the file.txt
+```
+
+`>>` (Redirect stdout — append)
+```bash
+echo "hello" >> file.txt # Appends output to the end of the file.
+```
+
+`2>` (Redirect stderr)
+```bash
+command 2> file # Redirects error output to a file.
+```
+
+`&>` (Redirect stdout + stderr)
+```bash
+command &> file #Redirects both normal output and errors into one file.
+```
+
+### Pipe Operator (Data → Command)
+
+`|` (Redirect stdout → Command)
+```bash
+ps aux | grep python 
+# Redirects the stdout of the left command 
+# to the stdin of the right command.
+```
+
+### Control Operators (Execution flow)
+
+`&&` (Logical AND)
+```bash
+command1 && command2    # Runs the next command if the previous succeeds
+```
+
+`||` (Logical OR)
+```bash
+command1 || command2    # Runs the next command if the previous fails
+```
+
+`;` (Sequential Execution)
+```bash
+command1 ; comman2  # Runs command sequentially regardless of success or failure.
 ```
