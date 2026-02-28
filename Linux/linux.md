@@ -6,11 +6,24 @@
 1. [Linux navigation](#core-linux-navigation-commands)
 2. [File management](#2-file-management-basics)
 3. [Permissions & ownership](#3-permissions--ownership)
-4. [Shell Redirection & Operators](#4shell-redirection--control-operators)
+4. [Processes & System Control](#4-processes--system-control)
+5. 
 5. []()
 5. []()
-5. []()
-5. []()
+5. [Shell Redirection & Operators](#4shell-redirection--control-operators)
+</details>
+
+<details>
+    <summary>Things to be clear</strong></summary>
+
+1. The fundamental structure of a command in linux(unix like os) is:
+`command [options] [arguments]`
+ - Command: The name of the program to be executed (`ls`, `grep`, `cd`)
+ - Options (Flags): Modifiers that change the behavior of the command, usually preceded by a dash (-) or two dashes (--) for spelled-out options
+ - Arguments: The target of the command, such as a file name, directory, or text string
+2. Combining Options: Single-character options can often be combined after a single dash (e.g., ls -la). 
+3. sudo (superuser do) - makes you an admin for shortperiod, giving elevated privileges
+
 </details>
 
 ## 1. Core Linux Navigation Commands
@@ -152,7 +165,7 @@ man <command> # opens the official manual for <command>
 These commands allow you to create, modify, copy, move, delete or view files and directories.
 
 ---
-## `Create/delete`-
+## Create/delete-
 ### `touch` (Create File)
 ```bash
 touch <file> # Creates an empty file (if exists it will update the file)
@@ -170,22 +183,22 @@ rmdir <foldername>  # Removes a directory (if empty)
 ### `rm` (Remove)
 ```bash
 rm <file>           # Deletes a file
-rm -r foldername    # Deletes a directory recursively (with everything in it)
+rm -R foldername    # Deletes a directory recursively (with everything in it)
 rm -f filename.txt  # Force delete
 rm -rf foldername   # Force delete directory recursively
 ```
-## `Copy/cut`-
+## Copy/cut-
 ### `cp` (Copy)
 ```bash
 cp <source> <destination>  # Copy from source to destination
-cp -r folder1 folder2   # Copy directory recursively
+cp -R folder1 folder2   # Copy directory recursively
 ```
 ### `mv` (Move / Rename)
 ```bash
 mv <source> <destination>  # Move from source to destination
 mv file.txt newname.txt # It can be used as renaming tool
 ```
-## `View`-
+## View-
 ### `cat` (Display / Concatenate)
 ```bash
 cat <file>  # Display content
@@ -208,7 +221,7 @@ tail -f <file>  # Follow file updates in real-time (for logs)
 ### `grep` (Search for Text in Files)
 ```bash
 grep "search_term" file.txt # Searches for search_term within file.txt
-grep -r "something" somefile.txt    # Searches for something within somefile.txt
+grep -R "something" somefile.txt    # Searches for something within somefile.txt
 ```
 ### `ln` (Link)
 ```bash
@@ -233,7 +246,7 @@ Each permission is represented by a letter:
 - `x` (execute: run the file as a program)
 - `-` (permission not granted)
 
-## `Seeing permissions`-
+## Seeing permissions-
 ### `ls -l` (long formatted list)
 ```bash
 ls -l <file> 
@@ -248,7 +261,7 @@ ls -l <file>
 # last : file name
 ```
 
-## `Changing permissions`-
+## Changing permissions-
 ### `chmod` (change mode)
 Numeric mode
 ```bash
@@ -265,12 +278,168 @@ chmod [who][operator][permissions] <file>
 # example: chmod u+x, g=r file.txt # add execute permission to user, set read permission to group
 ```
 
-## `Changing ownership`-
+## Changing ownership-
 ### `chown` (change owner)
 ```bash
 chown <owner>:<group> <file> # change the owner and group of the file to <owner> and <group>
-sudo chown -R <owner>:<group> <directory> # Recursively change the owner and group of the directory to <owner> and <group>
+chown -R <owner>:<group> <directory> # Recursively change the owner and group of the directory to <owner> and <group>
 ```
+
+## Creating new users and groups-
+### `useradd`
+```bash
+useradd <username>  # Create a user
+```
+### `passwd`
+```bash
+passwd  # Set the password for the current user
+passwd <username>   # Set the password for the <username>
+passwd -S [username]    # displays if an account is locked or active
+passwd -l [username]    # disables a password
+passwd -u [username]    # re-enables a password
+passwd -d [username]    # removes the password
+```
+
+### `groupadd`
+```bash
+groupadd <groupname>  # Create a group
+usermod -aG <groupname> <username>  # Add user to an existing group
+```
+### `su` (Switch user)
+```bash
+su <username>  # Switch to another user (with login shell)
+su - <username> # Switch to a specific user and load their full environment
+su -c <cmd> <user> # Run a single command as another user
+sudo -i -u <username>  # Switch to another user (without needing their password if you're root or have sudo permissions)
+```
+
+## 4. Processes & System Control
+## Viewing Processes-
+### `top`
+```bash
+top     # Opens a real-time system monitoring tool (like task-manager)
+htop    # Enhanced version of top (required installation)
+```
+### `ps` (Processes)
+```bash
+ps      # Shows processes running in the current shell
+ps aux  # Shows all running processes in full format
+ps -ef  # Another variant to show processes with more details
+ps -u <username>    # List processes for <username>
+```
+
+## Killing Processes-
+### `kill`  (End/terminate process by PID (process id))
+```bash
+kill <PID>      # Kill process by PID
+kill -9 <PID>   # Force kill a process (SIGKILL)
+```
+### `pkill` (Kill processes by name)
+```bash
+pkill <process-name>    # Kill process by name
+```
+### `killall` (Kill all processes by name)
+```bash
+killall <process_name>  # Kill all processes by name
+```
+
+## Process Control (Bandground/foreground)-
+### `job` (Process that was started from the current session)
+```bash
+job # See all the current jobs and job Ids
+```
+### `bg` (Background)
+```bash
+bg <job-id>     
+# Send process to background
+# Use ctrl+z to suspend the process and display its job number
+bg %<job-id>
+# Resumes the execution in the background
+```
+### `fg` (Foreground)
+```bash
+fg <job_id> # Bring a job to the foreground
+```
+
+## System Control-
+### `shutdown`
+```bash
+shutdown -h now   # Shutdown immediately
+shutdown -h +10   # Shutdown in 10 minutes
+shutdown -r now   # Reboot immediately
+shutdown -r 22:00 # Reboot at 10:00 PM
+```
+### `reboot`
+```bash
+reboot      # Reboot immediately
+```
+### `poweroff`
+```bash
+poweroff    # Poweroff immediately
+```
+### `halt`
+```bash
+halt    # Stops the os, not the machine
+```
+
+## System Monitoring-
+### `df` (Disk free)
+```bash
+df -h      # Human-readable format for disk usage
+df -T	   # Type of file system (ext4, xfs, tmpfs)
+df .	   # Info of the disk containing the current folder
+```
+### `du` (Disk usage)
+```bash
+du -sh <dir>     # Show the total size of a directory
+du -ah <dir>     # Show the size of all files and directories
+```
+### `free`
+```bash
+free -h      # Show RAM usage in human-readable format
+```
+### `iostat` (Input-output status)
+```bash
+iostat       # Show CPU and I/O statistics
+```
+### `uptime`
+```bash
+uptime       # Display uptime, load average, and number of users
+```
+
+## Managing Services
+### `systemctl` (System control)
+```bash
+systemctl status <service_name>   # Check the status of a service
+
+systemctl start <service_name>    # Start a service
+systemctl stop <service_name>     # Stop a service
+systemctl restart <service_name>  # Restart a service
+
+systemctl enable <service_name>   # Enable service to start at boot
+systemctl disable <service_name>  # Disable service from starting at boot
+```
+
+## Start process with priority
+### `nice`
+```bash
+nice -n <priority> <command>  # Start a process with lower/higher priority
+```
+### `renice`
+```bash
+renice <priority> -p <PID>  # Change priority of an existing process
+```
+
+## File System Management for Processes
+### `mount`
+```bash
+mount <directory>   # Mount a drive to <directory>
+```
+### `unmount`
+```bash
+umount <directory>   # Unmount the file system from <directory>
+```
+
 
 
 ## 4.Shell Redirection & Control Operators
@@ -286,7 +455,7 @@ Linux commands communicate using:
 - stdout (standard output)
 - stderr (standard error)
 
-### Redirection Operators (Data → File)
+## Redirection Operators (Data → File)
 
 `>` (Redirect stdout — overwrite)
 ```bash
@@ -308,16 +477,15 @@ command 2> file # Redirects error output to a file.
 command &> file #Redirects both normal output and errors into one file.
 ```
 
-### Pipe Operator (Data → Command)
+## Pipe Operator (Data → Command)
 
 `|` (Redirect stdout → Command)
 ```bash
 ps aux | grep python 
-# Redirects the stdout of the left command 
-# to the stdin of the right command.
+# Redirects the stdout of the left to the stdin of the right cmd.
 ```
 
-### Control Operators (Execution flow)
+## Control Operators (Execution flow)
 
 `&&` (Logical AND)
 ```bash
