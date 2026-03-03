@@ -220,8 +220,9 @@ tail -f <file>  # Follow file updates in real-time (for logs)
 ```
 ### `grep` (Search for Text in Files)
 ```bash
+grep "search_term" .    # Searched for search_term within the current directory
 grep "search_term" file.txt # Searches for search_term within file.txt
-grep -R "something" somefile.txt    # Searches for something within somefile.txt
+grep -R "search_term" file.txt    # Searches for something within file.txt
 ```
 ### `ln` (Link)
 ```bash
@@ -327,6 +328,10 @@ ps aux  # Shows all running processes in full format
 ps -ef  # Another variant to show processes with more details
 ps -u <username>    # List processes for <username>
 ```
+```bash
+ps aux | grep <process>
+pgrep <process> # Alternating version of the previous command
+```
 
 ## Killing Processes-
 ### `kill`  (End/terminate process by PID (process id))
@@ -344,9 +349,9 @@ killall <process_name>  # Kill all processes by name
 ```
 
 ## Process Control (Bandground/foreground)-
-### `job` (Process that was started from the current session)
+### `jobs` (Process that was started from the current session)
 ```bash
-job # See all the current jobs and job Ids
+jobs # See all the current jobs and job Ids
 ```
 ### `bg` (Background)
 ```bash
@@ -433,16 +438,17 @@ renice <priority> -p <PID>  # Change priority of an existing process
 ## File System Management for Processes
 ### `mount`
 ```bash
-mount <directory>   # Mount a drive to <directory>
+mount   # List mounted file systems
+mount <source> <target>   # Mount source to target
 ```
-### `unmount`
+### `umount` (Unmount)
 ```bash
 umount <directory>   # Unmount the file system from <directory>
 ```
 
 
 
-## 4.Shell Redirection & Control Operators
+## 8.Shell Redirection & Control Operators
 
 
 These operators control:
