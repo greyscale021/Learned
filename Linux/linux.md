@@ -42,6 +42,7 @@ pwd # Shows your current location in the filesystem.
 
 ```bash
 ls      # Lists files in the current directory.
+ls <folder> # Lists file in the <folder>
 ls -l   # Long format (permissions, owner, size, date)
 ls -a   # Show hidden files (files starting with ".")
 ls -la  # Show long formatted hidden files
@@ -168,7 +169,11 @@ These commands allow you to create, modify, copy, move, delete or view files and
 ## Create/delete-
 ### `touch` (Create File)
 ```bash
-touch <file> # Creates an empty file (if exists it will update the file)
+touch <file> # Creates an empty file (if exists it will update the files timestamp)
+
+touch -c <file.txt> # Change only the timestamp
+touch -a <file.txt> # Change only the access time
+touch -m <file.txt> # Change only the modification time
 ```
 ### `mkdir` (Make directory)
 ```bash
