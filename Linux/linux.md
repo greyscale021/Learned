@@ -179,7 +179,7 @@ touch -m <file.txt> # Change only the modification time
 ```bash
 mkdir <foldername>  # Creates a directory
 mkdir <dir1> <dir2> # Creates multiple directories
-mkdir -p a/b/c      # Creates nested directories | -p stands for parent
+mkdir -p a/b/c  # Creates nested directories | -p stands for parent
 ```
 ### `rmdir` (Remove directory)
 ```bash
@@ -221,30 +221,29 @@ head <file> # View the first few lines of a file
 ```bash
 tail <file> # View the last few lines of a file
 tail -f <file>  # Follow file updates in real-time (for logs)
-# -f for tails, stands for follow, it shows the realtime appended data in the last part of the file
+# -f (follow), it shows the realtime appended data in the last part of the file
 ```
 ### `grep` (Search for Text in Files)
 ```bash
-grep "search_term" .    # Searched for search_term within the current directory
-grep "search_term" file.txt # Searches for search_term within file.txt
-grep -R "search_term" file.txt    # Searches for something within file.txt
+grep "search_term" <file>  # Searches for search_term within the <file>
+grep -R "search_term" <directory>  # Searches for something within directory
 ```
 ### `ln` (Link)
 ```bash
-ln <somefile> <link-of-somefile> # Creates a hard link named link-of-somefile somefile
+ln <file1> <file2> # Creates a hard link between file1 and file2 (both shares the same data and memory)
 ```
 ### `nano` (Simple text editor)
 ```bash
-nano <file.txt> # Opens file in nano editor(Ctrl+o:save, Ctrl+x:exit)
+nano <file.txt> # Opens file in nano editor(Ctrl+O: Save, Ctrl+X: Exit)
 ```
 ---
 ## 3. Permissions & Ownership
 
 In Linux, permissions control who(users) can read, write, and execute files. Each file has a set of permissions for the:
 
-- User (u)(owner): the person who created the file
-- Group (g): a group of users that are associated with the file
-- Others (o): all other users
+- User (u)(owner): The person who created the file
+- Group (g): Group of users that are associated with the file
+- Others (o): All other users
 
 Each permission is represented by a letter:
 - `r` (read: view contents of the file)
@@ -258,7 +257,7 @@ Each permission is represented by a letter:
 ls -l <file> 
 # Example output: -rwxr-xr-- 1 user group 1234 Jan 1 file.txt
 # first column: file type (regular-file: -, directory: d, link: l) 
-# and permissions split into three groups (per three characters): owner(rwx) | group(r-x) | others(r--)
+# permissions split into three groups (per three characters r,w,x): owner(rwx) | group(r-x) | others(r--)
 # second : number of hard link
 # third : owner
 # fourth : group
@@ -268,48 +267,62 @@ ls -l <file>
 ```
 
 ## Changing permissions-
-### `chmod` (change mode)
+### `chmod` (Change mode)
 Numeric mode
 ```bash
 chmod <permissions> <file>
 # r:4, w:2, x:1 
-# so rwx = 7, rw- = 6, r-- = 4
-# example: chmod 755 file.txt  # User gets rwx, group gets rx, others get rx
+# rwx = 7, rw- = 6, r-x = 5, r-- = 4, --- = 0
+# chmod 755 file.txt  (User- rwx, group- rx, others- rx)
 ```
 Symbolic mode
 ```bash
 chmod [who][operator][permissions] <file>
 # who: u (user/owner), g (group), o (others), a(all)
 # operator: + (add), - (remove), = (set exactly)
-# example: chmod u+x, g=r file.txt # add execute permission to user, set read permission to group
+# chmod u+x, g=r file.txt # add execute permission to user, set read only permission to group
+# chmod +x script.sh   (Add execute permission to all)
+# chmod u+x,g+x,o+x script.sh (Previous command was equivalent to this)
 ```
 
 ## Changing ownership-
+### `who`
+```bash
+who     # Displays usernames, terminal lines, and login times
+users   # All logged in users
+groups  # All groups
+w       # Shows logged-in users along with their current activity and idle time
+```
 ### `chown` (change owner)
 ```bash
-chown <owner>:<group> <file> # change the owner and group of the file to <owner> and <group>
+chown <owner>:<group> <file> # Change the owner and group of the file to <owner> and <group>
 chown -R <owner>:<group> <directory> # Recursively change the owner and group of the directory to <owner> and <group>
 ```
 
 ## Creating new users and groups-
 ### `useradd`
 ```bash
-useradd <username>  # Create a user
-```
-### `passwd`
-```bash
-passwd  # Set the password for the current user
-passwd <username>   # Set the password for the <username>
-passwd -S [username]    # displays if an account is locked or active
-passwd -l [username]    # disables a password
-passwd -u [username]    # re-enables a password
-passwd -d [username]    # removes the password
-```
+useradd <username>  # Creates a user
+useradd -m <username>  # Creates a user and a user directory
 
+sudo userdel <username> # Deletes a user
+sudo userdel -r <username>  # Deletes a user and their files
+```
 ### `groupadd`
 ```bash
 groupadd <groupname>  # Create a group
+groupdel <groupname>  # Deletes a group
+
 usermod -aG <groupname> <username>  # Add user to an existing group
+```
+### `passwd`
+```bash
+passwd      # Set the password for the current user
+passwd <username>       # Set the password for the <username>
+passwd -S [username]    # displays if an account is locked or active (P- password set, L- locked, NP- no password)
+passwd -l [username]    # disables a password
+passwd -u [username]    # re-enables a password
+passwd -d [username]    # removes the password
 ```
 ### `su` (Switch user)
 ```bash
