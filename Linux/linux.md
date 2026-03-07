@@ -23,6 +23,9 @@
  - Arguments: The target of the command, such as a file name, directory, or text string
 2. Combining Options: Single-character options can often be combined after a single dash (e.g., ls -la). 
 3. sudo (superuser do) - makes you an admin for shortperiod, giving elevated privileges
+4. Process and Service are different things in linux
+ - Process: A running instance of a program
+ - Service: A background program managed by the system (usually by systemd)
 
 </details>
 
@@ -333,25 +336,36 @@ sudo -i -u <username>  # Switch to another user (without needing their password 
 ```
 
 ## 4. Processes & System Control
-## Viewing Processes-
+## Process Control-
+`Monitoring`:
 ### `top`
 ```bash
 top     # Opens a real-time system monitoring tool (like task-manager)
+# q - quit, k - kill process by pid, shift + (p - sort by cpu, m - sort by memory, v - parent tree view)
 htop    # Enhanced version of top (required installation)
 ```
 ### `ps` (Processes)
 ```bash
 ps      # Shows processes running in the current shell
-ps aux  # Shows all running processes in full format
-ps -ef  # Another variant to show processes with more details
+ps aux  # a-all user | u-user oriented | x-include ps without terminal (daemons)
+ps -ef  # e- every process | f- full format (normally used in scripting)
 ps -u <username>    # List processes for <username>
 ```
 ```bash
-ps aux | grep <process>
-pgrep <process> # Alternating version of the previous command
+pgrep <process> # PID grep of <process>
+```
+`Start process with priority`-
+### `nice`
+```bash
+nice -n <priority> <command>  # Start a process with higher/lower priority
+# Higher the n value, lower the priority (default n value 0, lowest -20, highest 19)
+```
+### `renice`
+```bash
+renice <priority> -p <PID>  # Change priority of an existing process
 ```
 
-## Killing Processes-
+`Ending`:
 ### `kill`  (End/terminate process by PID (process id))
 ```bash
 kill <PID>      # Kill process by PID
@@ -366,7 +380,7 @@ pkill <process-name>    # Kill process by name
 killall <process_name>  # Kill all processes by name
 ```
 
-## Process Control (Bandground/foreground)-
+`Process (Background/foreground)`-
 ### `jobs` (Process that was started from the current session)
 ```bash
 jobs # See all the current jobs and job Ids
@@ -385,12 +399,70 @@ fg <job_id> # Bring a job to the foreground
 ```
 
 ## System Control-
+`Monitoring`-
+### `top`
+```bash
+top     # A task-manager to monitor everything
+```
+### `uptime`
+```bash
+uptime       # Display uptime, load average, and number of users
+```
+### `iostat` (Input-output status)
+```bash
+iostat       # Show CPU and I/O statistics
+```
+### `free`
+```bash
+free -h      # Show RAM usage in human-readable format
+```
+### `df` (Disk free) - Disk space of the whole filesystem
+```bash
+df         # Shows disk space usage of mounted filesystems
+df -h      # Human-readable format
+df -T	   # Type of file system (ext4, xfs, tmpfs)
+df .	   # Info of the disk containing the current folder
+```
+### `du` (Disk usage) - Size of specific files or directories
+```bash
+du               # Shows the disk used by directories(current, subs and . total)
+du -h  <dir>     # Human-readable
+du -sh <dir>     # Total size of a directory
+
+du -ah <dir>     # Displays sizes for every directory and file
+```
+
+`Managing`-
+### `systemctl` (System control)
+```bash
+systemctl status <service_name>   # Check the status of a service
+
+systemctl start <service_name>    # Start a service
+systemctl stop <service_name>     # Stop a service
+systemctl restart <service_name>  # Restart a service
+
+systemctl enable <service_name>   # Enable service to start at boot
+systemctl disable <service_name>  # Disable service from starting at boot
+```
+### `mount`
+```bash
+mount   # List mounted file systems
+mount <source> <target>   # Mount source to target
+```
+### `umount` (Unmount)
+```bash
+umount <directory>   # Unmount the file system from <directory>
+```
+
+`power`-
 ### `shutdown`
 ```bash
 shutdown -h now   # Shutdown immediately
 shutdown -h +10   # Shutdown in 10 minutes
 shutdown -r now   # Reboot immediately
 shutdown -r 22:00 # Reboot at 10:00 PM
+
+shutdown -c       # To cancel the schedule
 ```
 ### `reboot`
 ```bash
@@ -404,66 +476,6 @@ poweroff    # Poweroff immediately
 ```bash
 halt    # Stops the os, not the machine
 ```
-
-## System Monitoring-
-### `df` (Disk free)
-```bash
-df -h      # Human-readable format for disk usage
-df -T	   # Type of file system (ext4, xfs, tmpfs)
-df .	   # Info of the disk containing the current folder
-```
-### `du` (Disk usage)
-```bash
-du -sh <dir>     # Show the total size of a directory
-du -ah <dir>     # Show the size of all files and directories
-```
-### `free`
-```bash
-free -h      # Show RAM usage in human-readable format
-```
-### `iostat` (Input-output status)
-```bash
-iostat       # Show CPU and I/O statistics
-```
-### `uptime`
-```bash
-uptime       # Display uptime, load average, and number of users
-```
-
-## Managing Services
-### `systemctl` (System control)
-```bash
-systemctl status <service_name>   # Check the status of a service
-
-systemctl start <service_name>    # Start a service
-systemctl stop <service_name>     # Stop a service
-systemctl restart <service_name>  # Restart a service
-
-systemctl enable <service_name>   # Enable service to start at boot
-systemctl disable <service_name>  # Disable service from starting at boot
-```
-
-## Start process with priority
-### `nice`
-```bash
-nice -n <priority> <command>  # Start a process with lower/higher priority
-```
-### `renice`
-```bash
-renice <priority> -p <PID>  # Change priority of an existing process
-```
-
-## File System Management for Processes
-### `mount`
-```bash
-mount   # List mounted file systems
-mount <source> <target>   # Mount source to target
-```
-### `umount` (Unmount)
-```bash
-umount <directory>   # Unmount the file system from <directory>
-```
-
 
 
 ## 8.Shell Redirection & Control Operators
