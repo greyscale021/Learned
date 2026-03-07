@@ -3,14 +3,12 @@
 <details>
     <summary><strong>Index</strong></summary>
 
-1. [Linux navigation](#core-linux-navigation-commands)
-2. [File management](#2-file-management-basics)
+1. [Linux navigation](#1-core-linux-navigation-commands)
+2. [File management](#2-file-management)
 3. [Permissions & ownership](#3-permissions--ownership)
 4. [Processes & System Control](#4-processes--system-control)
-5. 
-5. []()
-5. []()
-5. [Shell Redirection & Operators](#4shell-redirection--control-operators)
+5. [SSH (Secure Shell)](#5-ssh-secure-shell)
+6. [Shell Redirection & Operators](#6shell-redirection--control-operators)
 </details>
 
 <details>
@@ -162,6 +160,13 @@ man <command> # opens the official manual for <command>
 - `/opt`  → Optional software
 - `/lib` → Essential shared libraries
 
+### Reading logs in /var/log
+```bash
+tail -f /var/log/syslog        # watch live system logs
+cat /var/log/syslog | grep ssh # filter logs for specific service
+ls /var/log                    # see what log files exist
+```
+
 ---
 
 ## 2. File Management
@@ -294,6 +299,7 @@ chmod [who][operator][permissions] <file>
 who     # Displays usernames, terminal lines, and login times
 users   # All logged in users
 groups  # All groups
+id      # User and group
 w       # Shows logged-in users along with their current activity and idle time
 ```
 ### `chown` (change owner)
@@ -337,7 +343,7 @@ sudo -i -u <username>  # Switch to another user (without needing their password 
 
 ## 4. Processes & System Control
 ## Process Control-
-`Monitoring`:
+### `Monitoring`:
 ### `top`
 ```bash
 top     # Opens a real-time system monitoring tool (like task-manager)
@@ -365,7 +371,7 @@ nice -n <priority> <command>  # Start a process with higher/lower priority
 renice <priority> -p <PID>  # Change priority of an existing process
 ```
 
-`Ending`:
+### `Ending`:
 ### `kill`  (End/terminate process by PID (process id))
 ```bash
 kill <PID>      # Kill process by PID
@@ -380,7 +386,7 @@ pkill <process-name>    # Kill process by name
 killall <process_name>  # Kill all processes by name
 ```
 
-`Process (Background/foreground)`-
+### `Process (Background/foreground)`-
 ### `jobs` (Process that was started from the current session)
 ```bash
 jobs # See all the current jobs and job Ids
@@ -399,7 +405,7 @@ fg <job_id> # Bring a job to the foreground
 ```
 
 ## System Control-
-`Monitoring`-
+### `Monitoring`-
 ### `top`
 ```bash
 top     # A task-manager to monitor everything
@@ -432,7 +438,7 @@ du -sh <dir>     # Total size of a directory
 du -ah <dir>     # Displays sizes for every directory and file
 ```
 
-`Managing`-
+### `Managing`-
 ### `systemctl` (System control)
 ```bash
 systemctl status <service_name>   # Check the status of a service
@@ -444,6 +450,18 @@ systemctl restart <service_name>  # Restart a service
 systemctl enable <service_name>   # Enable service to start at boot
 systemctl disable <service_name>  # Disable service from starting at boot
 ```
+### `journalctl` (diagnostic tool)
+```bash
+journalctl -u <service>        # logs for a specific service
+journalctl -u <service> -n 5   # last 5 lines
+journalctl -xe                 # most recent logs with context (use after a crash)
+journalctl -f                  # follow logs in real time
+journalctl --since "<time>"    # <time> can be: "10 min ago","2026-03-07 10:30:00", "yesterday"
+
+# When a service fails: systemctl status <service> first (quick snapshot),
+# then journalctl -xe (full picture), check /var/log if needed.
+```
+
 ### `mount`
 ```bash
 mount   # List mounted file systems
@@ -454,7 +472,7 @@ mount <source> <target>   # Mount source to target
 umount <directory>   # Unmount the file system from <directory>
 ```
 
-`power`-
+### `power`-
 ### `shutdown`
 ```bash
 shutdown -h now   # Shutdown immediately
@@ -477,8 +495,120 @@ poweroff    # Poweroff immediately
 halt    # Stops the os, not the machine
 ```
 
+## 5. SSH (Secure Shell)
 
-## 8.Shell Redirection & Control Operators
+SSH lets you securely connect to and control a remote machine over a network. All communication is encrypted.
+```bash
+ssh user@host          # Connect to a remote machine
+ssh user@ip            # Connect using IP address
+ssh -p 2222 user@host  # Connect on a specific port (default is 22)
+```
+---
+
+## Key Concepts
+
+**Password login** — Type a password every time. The password travels over the network encrypted.
+
+**Key-based login** — Generate a key pair. The private key stays on your machine. The public key goes on the server. No secret is transmitted — that's why it's safer.
+- Public key (id_rsa.pub) — Safe to share, goes on the server
+- Private key (id_rsa) — Never leave your machine
+
+---
+
+### `~/.ssh/` (Directory Structure)
+```bash
+~/.ssh/
+|-- id_rsa              # your private key (chmod 600 — only you can read)
+|-- id_rsa.pub          # your public key (safe to share)
+|-- authorized_keys     # public keys allowed to log in (lives on the server)
+|-- known_hosts         # servers you've connected to before (fingerprints)
+ `- config              # optional: shortcuts for ssh connections
+
+ # ssh = client, sshd = server daemon
+```
+
+Permissions matter — SSH will refuse to work if your private key is too open:
+```bash
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_rsa
+```
+
+---
+
+## Generating a Key Pair
+
+### `ssh-keygen`
+```bash
+ssh-keygen                   # Generate with defaults (RSA 3072-bit)
+ssh-keygen -t rsa -b 4096    # RSA 4096-bit (stronger)
+ssh-keygen -t ed25519        # Ed25519 (modern, recommended)
+
+# It will ask:
+# - Where to save (default: ~/.ssh/id_rsa) — press Enter to accept
+# - Passphrase — optional but adds an extra layer of protection
+```
+
+---
+
+## Copying Your Public Key to the Server
+
+### `ssh-copy-id`
+```bash
+ssh-copy-id user@host                        # Copy your public key to server
+ssh-copy-id -i ~/.ssh/id_rsa.pub user@host   # Specify which key to copy
+
+# It appends your public key to the server's ~/.ssh/authorized_keys
+```
+
+Manual equivalent:
+```bash
+cat ~/.ssh/id_rsa.pub | ssh user@host "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+```
+
+---
+
+## Disabling Password Login
+
+### `sshd_config`
+
+Once key-based auth works, disable password login to lock the server down.
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+Find and change these lines:
+```bash
+PasswordAuthentication no   # disable password login
+PubkeyAuthentication yes    # ensure key auth is enabled
+PermitRootLogin no          # never allow root to login directly
+```
+
+Apply the changes:
+```bash
+sudo systemctl restart sshd
+```
+---
+
+## How the Handshake Works
+
+`1.` Your machine connects to the server on port 22
+
+`2.` Server sends its fingerprint — have you seen it before?
+- Yes → auto-accepted from `known_hosts`
+- No → you type `yes` → saved to `known_hosts`
+
+`3.` Server checks `~/.ssh/authorized_keys` for your public key
+
+`4.` Server generates a random challenge, encrypts it with your public key
+- Only your private key can decrypt this
+
+`5.` Your machine decrypts it with the private key, sends proof back
+
+`6.` Server confirms — only the real private key could have done that → access granted
+
+---
+
+## 6.Shell Redirection & Control Operators
 
 
 These operators control:
