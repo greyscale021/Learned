@@ -29,7 +29,7 @@
 </details>
 
 <details>
-    <summary><strong>Linux Cheatsheet</strong></summary>
+    <summary><strong>Cheatsheet</strong></summary>
     
 | Category | Key Commands |
 |----------|-------------|
