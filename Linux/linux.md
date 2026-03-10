@@ -8,7 +8,8 @@
 3. [Permissions & ownership](#3-permissions--ownership)
 4. [Processes & System Control](#4-processes--system-control)
 5. [SSH (Secure Shell)](#5-ssh-secure-shell)
-6. [Shell Redirection & Operators](#6shell-redirection--control-operators)
+6. [Package Management & File Transfer ](#6-package-management--file-transfer)
+7. [Shell Redirection & Operators](#7shell-redirection--control-operators)
 </details>
 
 <details>
@@ -46,9 +47,9 @@ ls      # Lists files in the current directory.
 ls <folder> # Lists file in the <folder>
 ls -l   # Long format (permissions, owner, size, date)
 ls -a   # Show hidden files (files starting with ".")
-ls -la  # Show long formatted hidden files
 ls -h   # Human-readable file sizes
 ls -R   # Recursive (shows subdirectories)
+ls -la  # Show long formatted hidden files
 ls -lah # long format, hidden, human readable
 ```
 
@@ -121,6 +122,16 @@ dirs # Displays the current directory stack
 ---
 ## Command related tools :)
 
+### `history` (command history)
+```bash
+history     # History of previous commands.
+history <number>    # Show last <number> commands from recent
+!<number>   # Run the <number> numbered command from history
+!!      # Executes the last command
+!<command>  # Executes the most recent command starting with <command>
+history -c  # Clears the cmd history
+```
+
 ### `whatis`
 ```bash
 whatis <command> # Shows what does this command do in one sentence
@@ -145,6 +156,12 @@ whereis <command> # Shows all known locations of a command
 ```bash
 man <command> # opens the official manual for <command>
 ```
+### `alias`
+```bash
+alias <new_name>='<command>'    # Makes a alias of <command> as <new_name>
+unalias <name>      # Removes the alias
+alias       # List of alias
+```
 ---
 ### Important Directories
 
@@ -165,8 +182,9 @@ man <command> # opens the official manual for <command>
 tail -f /var/log/syslog        # watch live system logs
 cat /var/log/syslog | grep ssh # filter logs for specific service
 ls /var/log                    # see what log files exist
+find /var/log -name "*.log"    # find all log files
+find . -type f -mtime -1       # files modified in last 24hrs
 ```
-
 ---
 
 ## 2. File Management
@@ -211,6 +229,20 @@ cp -R folder1 folder2   # Copy directory recursively
 mv <source> <destination>  # Move from source to destination
 mv file.txt newname.txt # It can be used as renaming tool
 ```
+
+## Archive-
+### `zip`
+```bash
+zip <name.zip> <file>           # Zip <file> as <name.zip>
+zip -r <name.zip> <directory>   # Zip <directory> as <name.zip>
+```
+### `unzip`
+```bash
+unzip archive.zip               # Extract zip archive
+unzip -l archive.zip            # List contents without extracting
+unzip archive.zip -d /path/     # Extract to a specific directory
+```
+
 ## View-
 ### `cat` (Display / Concatenate)
 ```bash
@@ -249,7 +281,7 @@ nano <file.txt> # Opens file in nano editor(Ctrl+O: Save, Ctrl+X: Exit)
 
 In Linux, permissions control who(users) can read, write, and execute files. Each file has a set of permissions for the:
 
-- User (u)(owner): The person who created the file
+- User (u)(owner): The person who owns the file
 - Group (g): Group of users that are associated with the file
 - Others (o): All other users
 
@@ -258,8 +290,8 @@ Each permission is represented by a letter:
 - `w` (write: modify the file)
 - `x` (execute: run the file as a program)
 - `-` (permission not granted)
-
-## Seeing permissions-
+## Permission Control-
+### `View`-
 ### `ls -l` (long formatted list)
 ```bash
 ls -l <file> 
@@ -274,11 +306,12 @@ ls -l <file>
 # last : file name
 ```
 
-## Changing permissions-
-### `chmod` (Change mode)
+### `Change`-
+### `chmod` (Change mode) -  Controls File/Directory Permissions
 Numeric mode
 ```bash
 chmod <permissions> <file>
+chmod -R <permissions> <dir>
 # r:4, w:2, x:1 
 # rwx = 7, rw- = 6, r-x = 5, r-- = 4, --- = 0
 # chmod 755 file.txt  (User- rwx, group- rx, others- rx)
@@ -288,28 +321,39 @@ Symbolic mode
 chmod [who][operator][permissions] <file>
 # who: u (user/owner), g (group), o (others), a(all)
 # operator: + (add), - (remove), = (set exactly)
-# chmod u+x, g=r file.txt # add execute permission to user, set read only permission to group
+# chmod u+x, g=r file.txt :add execute permission to user, set read only permission to group
 # chmod +x script.sh   (Add execute permission to all)
 # chmod u+x,g+x,o+x script.sh (Previous command was equivalent to this)
 ```
 
-## Changing ownership-
+## Ownership control-
+### `View`-
 ### `who`
 ```bash
 who     # Displays usernames, terminal lines, and login times
-users   # All logged in users
-groups  # All groups
 id      # User and group
 w       # Shows logged-in users along with their current activity and idle time
 ```
+### `users`
+```bash
+users   # All logged in users
+```
+### `groups`
+```bash
+groups  # All groups
+```
+
+### `Change`-
 ### `chown` (change owner)
 ```bash
 chown <owner>:<group> <file> # Change the owner and group of the file to <owner> and <group>
+chown <owner> <file>    # Just change the <owner> of <file>
 chown -R <owner>:<group> <directory> # Recursively change the owner and group of the directory to <owner> and <group>
 ```
 
-## Creating new users and groups-
-### `useradd`
+
+## Managing users and groups
+### `useradd` (Add user)
 ```bash
 useradd <username>  # Creates a user
 useradd -m <username>  # Creates a user and a user directory
@@ -317,14 +361,15 @@ useradd -m <username>  # Creates a user and a user directory
 sudo userdel <username> # Deletes a user
 sudo userdel -r <username>  # Deletes a user and their files
 ```
-### `groupadd`
+### `su` (Switch user)
 ```bash
-groupadd <groupname>  # Create a group
-groupdel <groupname>  # Deletes a group
-
-usermod -aG <groupname> <username>  # Add user to an existing group
+su <username>  # Switch to <username> (keeps current env)
+su - <username> # Switch to <username> (Loads their full environment)
+su -c <cmd> <user> # Run a single command as another user
+sudo -i -u <username>  # Switch to another user (without needing their password if you're root or have sudo permissions)
 ```
-### `passwd`
+
+### `passwd` (Password)
 ```bash
 passwd      # Set the password for the current user
 passwd <username>       # Set the password for the <username>
@@ -333,12 +378,20 @@ passwd -l [username]    # disables a password
 passwd -u [username]    # re-enables a password
 passwd -d [username]    # removes the password
 ```
-### `su` (Switch user)
+
+### `groupadd` (Add group)
 ```bash
-su <username>  # Switch to another user (with login shell)
-su - <username> # Switch to a specific user and load their full environment
-su -c <cmd> <user> # Run a single command as another user
-sudo -i -u <username>  # Switch to another user (without needing their password if you're root or have sudo permissions)
+groupadd <groupname>  # Create a group
+groupdel <groupname>  # Deletes a group
+```
+### `usermod` (Modify user)
+```bash
+usermod -aG <group> <user>   # add user to group (-a = append)
+gpasswd -d <user> <group>    # Removes <user> from <group>
+
+usermod -L <user>            # lock account
+usermod -U <user>            # unlock account
+usermod -d /new/home <user>  # change home directory
 ```
 
 ## 4. Processes & System Control
@@ -386,7 +439,7 @@ pkill <process-name>    # Kill process by name
 killall <process_name>  # Kill all processes by name
 ```
 
-### `Process (Background/foreground)`-
+### `Process` (Background/foreground)-
 ### `jobs` (Process that was started from the current session)
 ```bash
 jobs # See all the current jobs and job Ids
@@ -406,9 +459,9 @@ fg <job_id> # Bring a job to the foreground
 
 ## System Control-
 ### `Monitoring`-
-### `top`
+### `uname`
 ```bash
-top     # A task-manager to monitor everything
+uname -a    # Display all system information in one line
 ```
 ### `uptime`
 ```bash
@@ -437,6 +490,11 @@ du -sh <dir>     # Total size of a directory
 
 du -ah <dir>     # Displays sizes for every directory and file
 ```
+### `lsblk` (List block)
+```bash
+lsblk       #   List information about all available block devices(hd,ssd,partitions etc)
+```
+
 
 ### `Managing`-
 ### `systemctl` (System control)
@@ -542,10 +600,16 @@ chmod 600 ~/.ssh/id_rsa
 ssh-keygen                   # Generate with defaults (RSA 3072-bit)
 ssh-keygen -t rsa -b 4096    # RSA 4096-bit (stronger)
 ssh-keygen -t ed25519        # Ed25519 (modern, recommended)
-
+```
+Things-
+```bash
 # It will ask:
-# - Where to save (default: ~/.ssh/id_rsa) — press Enter to accept
-# - Passphrase — optional but adds an extra layer of protection
+# Where to save (default: ~/.ssh/id_rsa)- press Enter to accept
+# Passphrase- optional but adds an extra layer of protection
+
+# After running ssh-keygen:
+# ~/.ssh/id_rsa        # private key (auto-created)
+# ~/.ssh/id_rsa.pub    # public key (auto-created)
 ```
 
 ---
@@ -608,7 +672,120 @@ sudo systemctl restart sshd
 
 ---
 
-## 6.Shell Redirection & Control Operators
+## 6. Package Management & File Transfer
+A package manager handles installing, updating, and removing software on Linux. Different distros use different ones.
+## Package Management-
+### `apt` (Advanced pakage tool)
+```bash
+apt update              # Refresh the package index (always run before install)
+apt upgrade             # Upgrade(update) all installed packages, using reference of pakage index
+apt install <package>   # Install a package
+apt remove <package>    # Remove a package (keeps config files)
+apt purge <package>     # Remove a package and its config files
+apt autoremove          # Remove unused dependencies
+apt search <package>    # Search for a package
+apt show <package>      # Show package details
+```
+
+### `snap`  (Cross-distro containerized apps) - Snap packages are self-contained. They bundle their own dependencies.
+
+```bash
+snap install <package>      # Install a snap package
+snap remove <package>       # Remove a snap package
+snap list                   # List installed snaps
+snap refresh                # Update all snap packages
+```
+
+## Archiving & Compression
+
+Archiving bundles files together. Compression reduces their size. `tar.gz` is standard on Linux servers. `zip` is useful for cross-platform sharing.
+
+### `tar` (Tape Archive)
+Flags-
+- c - create
+- x - extract
+- v - verbose
+- f - file
+- z - gzip
+
+```bash
+tar -cvf archive.tar folder/        # Create an archive
+tar -xvf archive.tar                # Extract an archive
+tar -czvf archive.tar.gz folder/    # Create a gzip-compressed archive
+tar -xzvf archive.tar.gz            # Extract a gzip-compressed archive
+tar -tf archive.tar                 # List contents without extracting
+```
+
+### `gzip`/`gunzip`
+
+```bash
+gzip <file>           # Compress file (replaces original with <file.gz>)
+gzip -k <file>        # Compress and keep the original
+gunzip <file>         # Decompress
+gzip -d <file>.gz     # Same as gunzip
+```
+
+## Networking & File Transfer
+
+### `ping`  (Useful for quickly checking network connectivity and latency)
+```bash
+ping <host>             # Test if a host is reachable
+ping -c 4 google.com    # Send exactly 4 packets then stop
+ping -i 2 google.com    # Ping every 2 seconds
+```
+### `curl` (Client URL)
+```bash
+curl <url>  # Fetch content from a URL (outputs to stdout)
+curl -o file.html <url> # Save output to a file
+curl -I <url>   # Fetch only the HTTP headers
+curl -X POST -d "data" <url>    # Send a POST request
+curl -H "Authorization: Bearer <token>" <url>  # Send request with a header
+curl -s <url>   # Silent mode (no progress bar)
+```
+> In DevOps used for API calls, health checks, and testing endpoints.
+
+### `wget` (Web Get)
+
+```bash
+wget <url>                          # Download a file from a URL
+wget -O output.zip <url>            # Save with a specific filename
+wget -c <url>                       # Resume an interrupted download
+wget -q <url>                       # Quiet mode
+wget -r <url>                       # Recursive download (entire site)
+```
+
+> `wget` is better for downloading files. `curl` is better for API interaction.
+
+---
+
+### `scp` (Secure Copy — over SSH)
+
+```bash
+scp file.txt user@host:/path/       # Copy local file to remote server
+scp user@host:/path/file.txt .      # Copy remote file to current directory
+scp -r folder/ user@host:/path/     # Copy entire directory recursively
+scp -P 2222 file.txt user@host:~/   # Use a non-default SSH port
+```
+
+> `scp` uses SSH under the hood — same keys, same port, same security.
+
+---
+
+### `rsync` (Remote Sync)
+
+```bash
+rsync -av source/ user@host:/dest/      # Sync local folder to remote
+rsync -av user@host:/source/ dest/      # Sync remote folder to local
+rsync -av --delete source/ dest/        # Mirror (delete files not in source)
+rsync -avz source/ user@host:/dest/     # Compress during transfer (-z)
+
+# Flags:
+# a - archive (preserves permissions, timestamps) | v - verbose | z - compress
+```
+
+> `rsync` only transfers changed files, making it far more efficient than `scp` for repeated syncs. Standard in DevOps for deployments and backups.
+
+## 7.Shell Redirection & Control Operators
 
 
 These operators control:
