@@ -13,7 +13,7 @@
 </details>
 
 <details>
-    <summary>Things to be clear</strong></summary>
+    <summary><strong>Things to be clear</strong></summary>
 
 1. The fundamental structure of a command in linux(unix like os) is:
 `command [options] [arguments]`
@@ -26,6 +26,31 @@
  - Process: A running instance of a program
  - Service: A background program managed by the system (usually by systemd)
 
+</details>
+
+<details>
+    <summary><strong>Linux Cheatsheet</strong></summary>
+    
+| Category | Key Commands |
+|----------|-------------|
+| Navigation | `pwd`, `ls`, `cd`, `tree`, `find`, `locate`, `stat`, `realpath`, `pushd`, `popd` |
+| Files | `touch`, `cp`, `mv`, `rm`, `mkdir`, `rmdir`, `ln`, `nano` |
+| Viewing | `cat`, `less`, `head`, `tail`, `tail -f`, `grep` |
+| Permissions | `chmod`, `chown`, `ls -l` |
+| Users & Groups | `useradd`, `userdel`, `usermod`, `groupadd`, `gpasswd`, `su`, `passwd` |
+| Ownership Info | `who`, `id`, `w`, `users`, `groups` |
+| Processes | `ps`, `top`, `htop`, `pgrep`, `kill`, `pkill`, `killall`, `nice`, `renice` |
+| Jobs | `jobs`, `bg`, `fg` — `Ctrl+Z` to suspend |
+| System Info | `uname`, `uptime`, `free`, `df`, `du`, `lsblk`, `iostat` |
+| Disk | `df`, `du`, `lsblk`, `mount`, `umount` |
+| Services | `systemctl`, `journalctl` |
+| SSH | `ssh`, `ssh-keygen`, `ssh-copy-id`, `scp`, `rsync` |
+| Packages | `apt`, `snap` |
+| Archiving | `tar`, `gzip`, `gunzip`, `zip`, `unzip` |
+| Networking | `ping`, `curl`, `wget` |
+| Shell Operators | `\|`, `>`, `>>`, `2>`, `&>`, `&&`, `\|\|`, `;` |
+| Power | `shutdown`, `reboot`, `poweroff`, `halt` |
+| Discovery | `man`, `whatis`, `which`, `whereis`, `type`, `history`, `alias` |
 </details>
 
 ## 1. Core Linux Navigation Commands
