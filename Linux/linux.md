@@ -362,10 +362,13 @@ w       # Shows logged-in users along with their current activity and idle time
 ### `users`
 ```bash
 users   # All logged in users
+getent passwd  # To see all users
+id <user>      # To see all <user> details
 ```
 ### `groups`
 ```bash
 groups  # All groups
+cat /etc/group  # To see all group details
 ```
 
 ### `Change`-
