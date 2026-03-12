@@ -543,9 +543,13 @@ journalctl -u <service> -n 5   # last 5 lines
 journalctl -xe                 # most recent logs with context (use after a crash)
 journalctl -f                  # follow logs in real time
 journalctl --since "<time>"    # <time> can be: "10 min ago","2026-03-07 10:30:00", "yesterday"
+journalctl -p err       # Only show errors
 
-# When a service fails: systemctl status <service> first (quick snapshot),
-# then journalctl -xe (full picture), check /var/log if needed.
+# When a service fails: 
+# systemctl status <service>    #quick snapshot
+# journalctl -xe        #full picture
+# journalctl -u <service> -n 50     # Look into that service
+# journalctl -b -1      # To look into boot
 ```
 
 ### `mount`
@@ -850,10 +854,17 @@ command &> file #Redirects both normal output and errors into one file.
 
 ## Pipe Operator (Data → Command)
 
-`|` (Redirect stdout → Command)
+`|` (Redirect stdout data → Command)
 ```bash
 ps aux | grep python 
 # Redirects the stdout of the left to the stdin of the right cmd.
+```
+## Substitution operator (stdout → as command)
+`$()` (Redirect stdout as command)
+```bash
+$(command)      
+# Runs command and substitutes its output directly into the shell line
+# As if user typed it in the shell
 ```
 
 ## Control Operators (Execution flow)
