@@ -1,6 +1,11 @@
 # Learned
 Here is everything that I have learned till date. Summarized so hopefully it can help you too : )
 
-- **Python** - fundamentals, data structures, functions, error handling, oop    [[note-link]](https://github.com/greyscale021/Learned/blob/main/python.md)
-- **Git** - version control workflow    [[note-link]](https://github.com/greyscale021/Learned/blob/main/Git.md)
-- **Linux** - navigation, filesystem, permissions, process management, SSH  [[note-link]](https://github.com/greyscale021/Learned/blob/main/Linux/linux.md)
+> Click the name to go to the notes
+
+| Topic | Subtopics | Status |
+|---|---|---|
+| [Python](https://github.com/greyscale021/Learned/blob/main/python.md) | fundamentals, data structures, functions, error handling, OOP | ✅ Done |
+| [Git](https://github.com/greyscale021/Learned/blob/main/Git.md) | version control workflow | ✅ Done |
+| [Linux](https://github.com/greyscale021/Learned/blob/main/Linux/linux.md) | navigation, filesystem, permissions, process management, SSH, package management, shell redirection | ✅ Done |
+| Scripting | |  🔄Next |
