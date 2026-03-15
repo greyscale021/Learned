@@ -15,14 +15,15 @@
 <details>
     <summary><strong>Things to be clear</strong></summary>
 
-1. The fundamental structure of a command in linux(unix like os) is:
-`command [options] [arguments]`
+1. Unix philosophy is "Do one thing well"
+2. The fundamental structure of a command in linux(unix like os) is:
+`command [flags] [arguments]`
  - Command: The name of the program to be executed (`ls`, `grep`, `cd`)
- - Options (Flags): Modifiers that change the behavior of the command, usually preceded by a dash (-) or two dashes (--) for spelled-out options
+ - Flags (options): Modifiers that change the behavior of the command, usually preceded by a dash (-) or two dashes (--) for spelled-out options
  - Arguments: The target of the command, such as a file name, directory, or text string
-2. Combining Options: Single-character options can often be combined after a single dash (e.g., ls -la). 
-3. sudo (superuser do) - makes you an admin for shortperiod, giving elevated privileges
-4. Process and Service are different things in linux
+3. Combining Options: Single-character options can often be combined after a single dash (e.g., ls -la). 
+4. sudo (superuser do) - makes you an admin for shortperiod, giving elevated privileges
+5. Process and Service are different things in linux
  - Process: A running instance of a program
  - Service: A background program managed by the system (usually by systemd)
 
@@ -685,19 +686,20 @@ On the client, generate a key pair:
 ssh-keygen -t ed25519        # recommended — modern, fast, secure
 # Press Enter to accept default save location (~/.ssh/id_ed25519)
 # Passphrase is optional but adds an extra layer of protection
+ssh-keygen -t ed25519 -f /path/to/directory/key_name    # -f flag for selecting path manually 
 ```
 
 Copy your public key to the server:
 
 ```bash
-ssh-copy-id -i ~/.ssh/id_ed25519.pub username@192.168.x.x
+ssh-copy-id -i ~/path_to_public_key username@192.168.x.x
 # Appends your public key to the server's ~/.ssh/authorized_keys
 ```
 
 Manual equivalent (if ssh-copy-id isn't available):
 
 ```bash
-cat ~/.ssh/id_ed25519.pub | ssh user@host "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+cat ~/.ssh/path_to_public_key | ssh user@host "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
 ```
 
 Now connect — no password:
@@ -750,18 +752,18 @@ journalctl -u ssh -f
 Instead of typing `ssh user@192.168.x.x` every time:
 
 ```bash
-# ~/.ssh/config
-Host name
-    HostName 192.168.x.x
-    User username
-    Port 22     # Default
-    IdentityFile ~/.ssh/id_ed25519
+# sudo nano ~/.ssh/config
+Host <name>     # The name you want to select
+    HostName <192.168.x.x>
+    User <username>     # Username
+    Port 22             # Default port
+    IdentityFile ~/path_to_private_key
 ```
 
 Now just type:
 
 ```bash
-ssh myserver    # add "command" to run commands
+ssh <name>      # You will be logged in, equivalent to "ssh user@ip"
 ```
 
 Essential once you're managing multiple servers.
@@ -849,6 +851,7 @@ A package manager handles installing, updating, and removing software on Linux. 
 ```bash
 apt update              # Refresh the package index (always run before install)
 apt upgrade             # Upgrade(update) all installed packages, using reference of pakage index
+apt full-upgrade        # Upgrade everything that were already fetched using, update, auto remove old packaged if necessary
 apt install <package>   # Install a package
 apt remove <package>    # Remove a package (keeps config files)
 apt purge <package>     # Remove a package and its config files
@@ -868,15 +871,20 @@ snap refresh                # Update all snap packages
 
 ## Archiving & Compression
 
-Archiving bundles files together. Compression reduces their size. `tar.gz` is standard on Linux servers. `zip` is useful for cross-platform sharing.
+In linux, 
+- Archiving- bundles files together. 
+- Compression- reduces their size. 
 
-### `tar` (Tape Archive)
+`tar.gz` is standard on Linux servers. `zip` is useful for cross-platform sharing.
+
+### `tar` (Tape Archive)- For archiving or compressing a directory
 Flags-
-- c - create
-- x - extract
-- v - verbose
-- f - file
-- z - gzip
+- c - create / write files into a new .tar
+- x - extract / unpack an archive
+- v - verbose / Print every file name while processing it.
+- t - list contents 
+- f - file name
+- z - gzip / Pipe through gzip(GNU zip)(compress) automatically
 
 ```bash
 tar -cvf archive.tar folder/        # Create an archive
@@ -886,7 +894,7 @@ tar -xzvf archive.tar.gz            # Extract a gzip-compressed archive
 tar -tf archive.tar                 # List contents without extracting
 ```
 
-### `gzip`/`gunzip`
+### `gzip`/`gunzip` - For compressing a file
 
 ```bash
 gzip <file>           # Compress file (replaces original with <file.gz>)
@@ -942,15 +950,17 @@ scp -P 2222 file.txt user@host:~/   # Use a non-default SSH port
 ---
 
 ### `rsync` (Remote Sync)
+Flags -
+- a - archive (preserves permissions, timestamps)
+- v - verbose
+- z - compress
+ 
 
 ```bash
 rsync -av source/ user@host:/dest/      # Sync local folder to remote
 rsync -av user@host:/source/ dest/      # Sync remote folder to local
 rsync -av --delete source/ dest/        # Mirror (delete files not in source)
 rsync -avz source/ user@host:/dest/     # Compress during transfer (-z)
-
-# Flags:
-# a - archive (preserves permissions, timestamps) | v - verbose | z - compress
 ```
 
 > `rsync` only transfers changed files, making it far more efficient than `scp` for repeated syncs. Standard in DevOps for deployments and backups.
