@@ -385,6 +385,7 @@ chown -R <owner>:<group> <directory> # Recursively change the owner and group of
 ```bash
 useradd <username>  # Creates a user
 useradd -m <username>  # Creates a user and a user directory
+adduser     # Automatically adds default flags to useradd
 
 sudo userdel <username> # Deletes a user
 sudo userdel -r <username>  # Deletes a user and their files
@@ -585,122 +586,259 @@ poweroff    # Poweroff immediately
 halt    # Stops the os, not the machine
 ```
 
-## 5. SSH (Secure Shell)
+# 5. SSH (Secure Shell)
 
-SSH lets you securely connect to and control a remote machine over a network. All communication is encrypted.
+SSH lets you securely connect to and control a remote machine(usually a server) over a network. All communication is encrypted.
+
 ```bash
 ssh user@host          # Connect to a remote machine
+#  user(a user on the server), host(server ip address)(or domain name)
 ssh user@ip            # Connect using IP address
 ssh -p 2222 user@host  # Connect on a specific port (default is 22)
+exit                   # Close the connection (or Ctrl+D)
 ```
+
 ---
 
 ## Key Concepts
 
-**Password login** — Type a password every time. The password travels over the network encrypted.
+**Password login** — You type a password every time. It travels over the network encrypted, but it still travels. Risk: brute force, weak passwords, credential leaks.
 
-**Key-based login** — Generate a key pair. The private key stays on your machine. The public key goes on the server. No secret is transmitted — that's why it's safer.
-- Public key (id_rsa.pub) — Safe to share, goes on the server
-- Private key (id_rsa) — Never leave your machine
+**Key-based login** — Generate a key pair. The private key stays on your machine. The public key goes on the server. The server locks a challenge with your public key — only your private key can unlock it. No secret ever crosses the network. That's why it's fundamentally safer.
+
+- **Public key** (`id_ed25519.pub`) — Safe to share, goes on the server
+- **Private key** (`id_ed25519`) — Never leaves your machine, treat like a password
 
 ---
 
-### `~/.ssh/` (Directory Structure)
+## `~/.ssh/` Directory Structure
+
 ```bash
 ~/.ssh/
-|-- id_rsa              # your private key (chmod 600 — only you can read)
-|-- id_rsa.pub          # your public key (safe to share)
-|-- authorized_keys     # public keys allowed to log in (lives on the server)
+|-- id_ed25519          # your private key (chmod 600 — only you can read)
+|-- id_ed25519.pub      # your public key (safe to share)
+|-- authorized_keys     # public keys allowed to log in (lives on the SERVER)
 |-- known_hosts         # servers you've connected to before (fingerprints)
  `- config              # optional: shortcuts for ssh connections
 
- # ssh = client, sshd = server daemon
+# ssh = client tool     sshd = server daemon
 ```
 
-Permissions matter — SSH will refuse to work if your private key is too open:
+| File | Lives on | Purpose |
+|---|---|---|
+| `id_ed25519` | Client | Your private key — never leaves |
+| `id_ed25519.pub` | Client | Your public key — safe to share |
+| `authorized_keys` | Server | Who is allowed to log in |
+| `known_hosts` | Client | Servers you've verified before |
+| `sshd_config` | Server | SSH server configuration |
+
+> **authorized_keys vs known_hosts:**
+> `authorized_keys` = server authenticating **you**.
+> `known_hosts` = you authenticating the **server** (prevents man-in-the-middle).
+
+**Permissions matter** — SSH refuses to work if your private key is too open:
+
 ```bash
 chmod 700 ~/.ssh
-chmod 600 ~/.ssh/id_rsa
+chmod 600 ~/.ssh/id_ed25519
 ```
+
+If you see `WARNING: UNPROTECTED PRIVATE KEY FILE!` — run the above. SSH protecting itself from world-readable private keys is a feature, not a bug.
 
 ---
 
-## Generating a Key Pair
+## Full Process — Connecting to a Remote Server
 
-### `ssh-keygen`
-```bash
-ssh-keygen                   # Generate with defaults (RSA 3072-bit)
-ssh-keygen -t rsa -b 4096    # RSA 4096-bit (stronger)
-ssh-keygen -t ed25519        # Ed25519 (modern, recommended)
-```
-Things-
-```bash
-# It will ask:
-# Where to save (default: ~/.ssh/id_rsa)- press Enter to accept
-# Passphrase- optional but adds an extra layer of protection
+### Phase 1 — Prepare the Server
 
-# After running ssh-keygen:
-# ~/.ssh/id_rsa        # private key (auto-created)
-# ~/.ssh/id_rsa.pub    # public key (auto-created)
+The server needs `sshd` running to accept connections.
+
+```bash
+sudo apt install openssh-server -y   # install if not present
+sudo systemctl enable ssh            # start on boot
+sudo systemctl start ssh             # start now
+sudo systemctl status ssh            # confirm active (running)
 ```
 
----
+### Phase 2 — Connect With Password (First Time)
 
-## Copying Your Public Key to the Server
+Get the server's IP and username from the server machine:
 
-### `ssh-copy-id`
 ```bash
-ssh-copy-id user@host                        # Copy your public key to server
-ssh-copy-id -i ~/.ssh/id_rsa.pub user@host   # Specify which key to copy
-
-# It appends your public key to the server's ~/.ssh/authorized_keys
+ip a       # find the 192.168.x.x address
+whoami     # confirm the username
 ```
 
-Manual equivalent:
+From the client:
+
 ```bash
-cat ~/.ssh/id_rsa.pub | ssh user@host "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+ssh username@192.168.x.x
 ```
 
----
+First connection → server sends fingerprint → you type `yes` → saved to `known_hosts` → enter password(the server machines) → you're in.
 
-## Disabling Password Login
+### Phase 3 — Set Up Key-Based Login
 
-### `sshd_config`
+On the client, generate a key pair:
 
-Once key-based auth works, disable password login to lock the server down.
+```bash
+ssh-keygen -t ed25519        # recommended — modern, fast, secure
+# Press Enter to accept default save location (~/.ssh/id_ed25519)
+# Passphrase is optional but adds an extra layer of protection
+```
+
+Copy your public key to the server:
+
+```bash
+ssh-copy-id -i ~/.ssh/id_ed25519.pub username@192.168.x.x
+# Appends your public key to the server's ~/.ssh/authorized_keys
+```
+
+Manual equivalent (if ssh-copy-id isn't available):
+
+```bash
+cat ~/.ssh/id_ed25519.pub | ssh user@host "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+```
+
+Now connect — no password:
+
+```bash
+ssh username@192.168.x.x
+```
+
+### Phase 4 — Harden the Server
+
+Once key login works, disable password login entirely:
+
 ```bash
 sudo nano /etc/ssh/sshd_config
 ```
 
-Find and change these lines:
-```bash
-PasswordAuthentication no   # disable password login
-PubkeyAuthentication yes    # ensure key auth is enabled
-PermitRootLogin no          # never allow root to login directly
+```
+PasswordAuthentication no    # disable password login
+PubkeyAuthentication yes     # keep key auth on
+PermitRootLogin no           # never allow direct root login
 ```
 
-Apply the changes:
 ```bash
 sudo systemctl restart sshd
 ```
+
+> Note: Always test in a **new terminal** before closing your current session. If key login fails after disabling passwords, you'll lock yourself out.
+
+---
+
+## Using the Server Remotely
+
+```bash
+# Full interactive session
+ssh username@ip
+
+# Run a single command without fully logging in
+ssh username@ip "uptime"
+ssh username@ip "df -h"
+ssh username@ip "free -h"
+
+# Watch SSH logs live on the server (tie this together with journalctl)
+journalctl -u ssh -f
+```
+
+---
+
+## The `config` File — Shortcuts
+
+Instead of typing `ssh user@192.168.x.x` every time:
+
+```bash
+# ~/.ssh/config
+Host name
+    HostName 192.168.x.x
+    User username
+    Port 22     # Default
+    IdentityFile ~/.ssh/id_ed25519
+```
+
+Now just type:
+
+```bash
+ssh myserver    # add "command" to run commands
+```
+
+Essential once you're managing multiple servers.
+
+---
+
+## The Passphrase + `ssh-agent`
+
+When `ssh-keygen` asks for a passphrase, most people skip it. Here's the trade-off:
+
+- **Without passphrase:** Anyone who gets your `id_ed25519` file can use it immediately.
+- **With passphrase:** Even if someone steals your private key file, they still need the passphrase to unlock it. Two layers.
+
+The downside is typing it every time when switching between servers— solved with `ssh-agent`:
+
+```bash
+eval "$(ssh-agent -s)"      # start the agent
+ssh-add ~/.ssh/id_ed25519   # add your key (type passphrase once)
+# now SSH without typing the passphrase again for the rest of the session
+```
+
+---
+
+## Key Types
+
+```bash
+ssh-keygen -t rsa -b 4096    # RSA — old standard, still fine
+ssh-keygen -t ed25519        # Ed25519 — modern, recommended
+```
+
+| Type | Key Size | Speed | Security |
+|---|---|---|---|
+| RSA | 4096 bits | Slower | Good |
+| Ed25519 | 256 bits | Much faster | Better |
+
+Ed25519 is based on modern elliptic curve math. A 256-bit Ed25519 key is more secure than a 4096-bit RSA key. Always use this for new keys.
+
 ---
 
 ## How the Handshake Works
 
-`1.` Your machine connects to the server on port 22
+```
+1. Client connects to server on port 22
+2. Server sends its fingerprint
+   └── In known_hosts? → auto-accept | First time? → you type yes → saved
+3. Client offers public key
+4. Server checks authorized_keys → finds it
+5. Server encrypts a random challenge with your public key → sends it
+6. Client decrypts it with private key → sends back proof
+7. Server confirms → only the real private key could do that → access granted
+```
 
-`2.` Server sends its fingerprint — have you seen it before?
-- Yes → auto-accepted from `known_hosts`
-- No → you type `yes` → saved to `known_hosts`
+Your private key never crosses the network. The server never sees it. It only sees proof that you have it.
 
-`3.` Server checks `~/.ssh/authorized_keys` for your public key
+---
 
-`4.` Server generates a random challenge, encrypts it with your public key
-- Only your private key can decrypt this
+## Common Errors
 
-`5.` Your machine decrypts it with the private key, sends proof back
+| Error | Meaning | Fix |
+|---|---|---|
+| `Permission denied (publickey)` | Server doesn't have your public key | Run `ssh-copy-id` |
+| `WARNING: UNPROTECTED PRIVATE KEY FILE` | Key permissions too open | `chmod 600 ~/.ssh/id_ed25519` |
+| `Host key verification failed` | Server fingerprint changed | Verify server, update `known_hosts` |
+| `Connection refused` | sshd not running or wrong port | Check `systemctl status ssh` on server |
+| `Connection timed out` | Firewall blocking port 22 or wrong IP | Check IP and firewall |
 
-`6.` Server confirms — only the real private key could have done that → access granted
+---
+
+## Why This Matters for DevOps
+
+SSH is the backbone of everything remote:
+
+- Connecting to EC2 instances on AWS
+- Ansible (runs over SSH under the hood)
+- Git over SSH
+- CI/CD pipelines authenticating to servers
+- Port forwarding and tunneling
 
 ---
 
@@ -854,7 +992,7 @@ command &> file #Redirects both normal output and errors into one file.
 
 ## Pipe Operator (Data → Command)
 
-`|` (Redirect stdout data → Command)
+`|` (Redirect stdout data → Command stdin)
 ```bash
 ps aux | grep python 
 # Redirects the stdout of the left to the stdin of the right cmd.
