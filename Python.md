@@ -1,5 +1,12 @@
 # Python Notes
-> Focused on cloud engineering (automation, scripting, AWS SDK) + occasional competitive programming.
+> Focused on cloud engineering (automation, scripting, AWS SDK) and basic competitive programming.
+
+<details>
+    <summary><strong>Things to be clear</strong></summary>
+
+1. This note is not for complete beginner, first get comfortable with the basics then use it.
+    
+</details>
 
 ## Table of Contents
 
@@ -103,22 +110,50 @@ def greet(name: str, times: int = 1) -> str:
 ```
 
 ### String formatting
+> Note:Strings are immutable, so we can't change it, (.) methods creates new strings, so we must assign them.
 
 ```python
-name, score = "Alice", 98.6
+name, score = "Alice", 98.67
 
-# f-strings (preferred)
-print(f"{name} scored {score:.1f}")      # Alice scored 98.6
+# f-strings (format specifiers)
+f"{name} scored {score:.1f}"    # "Alice scored 98.7"  — 1 decimal
+f"{score:.2f}"                  # "98.67"   — 2 decimals
+f"{score:.0f}"                  # "99"  — rounded
+f"{42:05d}"                     # "00042"   — zero padded
 
-# Common string methods
-"hello world".upper()         # "HELLO WORLD"
-"  hello  ".strip()           # "hello"
-"a,b,c".split(",")            # ["a", "b", "c"]
-", ".join(["a", "b", "c"])    # "a, b, c"
-"hello".replace("l", "r")     # "herro"
-"error: disk full".startswith("error")   # True
+# Case
+"hello".upper()                 # "HELLO"
+"HELLO".lower()                 # "hello"
+"hello world".capitalize()      # "Hello world"  — first letter only
+"hello world".title()           # "Hello World"  — every word
+
+# Whitespace
+"  hello  ".strip()             # "hello"   — both sides
+"  hello  ".lstrip()            # "hello  " — left only
+"  hello  ".rstrip()            # "  hello" — right only
+
+# Search
+"hello".find("l")               # 2 — index of first match, -1 if not found
+"hello".count("l")              # 2 — total occurrences
+"error: disk".startswith("error")  # True
+"error: disk".endswith("disk")     # True
+
+# Split & Join
+"a,b,c".split(",")              # ["a", "b", "c"]
+", ".join(["a", "b", "c"])      # "a, b, c"
+
+# Replace & Pad
+"hello".replace("l", "r")       # "herro"
+"42".zfill(5)                   # "00042"
+"hi".ljust(10, "-")             # "hi--------"
+"hi".rjust(10, "-")             # "--------hi"
+
+# Validation
+"123".isdigit()     # True — useful for input validation
+"hello".isalpha()   # True
+"hello".islower()   # True
+"HELLO".isupper()   # True
 ```
-
 ---
 
 ## 3. Control Flow
@@ -126,7 +161,7 @@ print(f"{name} scored {score:.1f}")      # Alice scored 98.6
 ### if / elif / else
 
 ```python
-score = 87
+score = int(input())
 
 if score >= 90:
     grade = "A"
@@ -154,7 +189,7 @@ for service in services:
 
 # With index
 for i, service in enumerate(services, start=1):
-    print(f"{i}. {service}")
+    print(f"{i}: {service}")
 
 # Range
 for i in range(0, 10, 2):   # start, stop, step
@@ -203,13 +238,12 @@ match command:
 
 ## 4. Functions
 
-Functions are **first-class objects** in Python — they can be assigned to variables, passed as arguments, and returned from other functions.
+Functions are **first-class objects**(can be passed around) in Python — they can be assigned to variables, passed as arguments, and returned from other functions.
 
 ### Basic definition
 
 ```python
-def add(a: int, b: int) -> int:
-    """Return the sum of two integers."""
+def add(a: int, b: int) -> int: # Return the sum of two integers.
     return a + b
 
 result = add(5, 3)   # 8
@@ -219,10 +253,10 @@ result = add(5, 3)   # 8
 
 ```python
 def connect(host: str, port: int = 22) -> None:
-    print(f"Connecting to {host}:{port}")
+    print(f"Connecting to {host} :{port}")
 
-connect("192.168.1.1")           # Connecting to 192.168.1.1:22
-connect("192.168.1.1", port=80)  # Connecting to 192.168.1.1:80
+connect("192.168.1.1")           # Connecting to 192.168.1.1 :22
+connect("192.168.1.1", 80)  # Connecting to 192.168.1.1 :80
 ```
 
 ### *args and **kwargs
@@ -255,6 +289,7 @@ Small, anonymous, single-expression functions. Most useful as sort keys.
 
 ```python
 # Sort a list of dicts by a field
+# Will return the statement result.
 instances = [{"id": "i-3", "cpu": 80}, {"id": "i-1", "cpu": 20}]
 instances.sort(key=lambda x: x["cpu"])
 ```
