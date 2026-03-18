@@ -110,7 +110,7 @@ def greet(name: str, times: int = 1) -> str:
 ```
 
 ### String formatting
-> Note:Strings are immutable, so we can't change it, (.) methods creates new strings, so we must assign them.
+> Note:Strings are immutable, so we can't change it, (.) methods creates new strings.
 
 ```python
 name, score = "Alice", 98.67
@@ -179,7 +179,7 @@ else:
 status = "adult" if age >= 18 else "minor"
 ```
 
-### for loop
+### for loop (Used on iterables)
 
 ```python
 services = ["ec2", "s3", "lambda"]
@@ -188,7 +188,7 @@ for service in services:
     print(service)
 
 # With index
-for i, service in enumerate(services, start=1):
+for i, service in enumerate(services, start=1): # Unpacking
     print(f"{i}: {service}")
 
 # Range
@@ -196,7 +196,7 @@ for i in range(0, 10, 2):   # start, stop, step
     print(i)                 # 0 2 4 6 8
 ```
 
-### while loop
+### while loop (Loop pressists until condition is false )
 
 ```python
 retries = 0
@@ -256,24 +256,31 @@ def connect(host: str, port: int = 22) -> None:
     print(f"Connecting to {host} :{port}")
 
 connect("192.168.1.1")           # Connecting to 192.168.1.1 :22
-connect("192.168.1.1", 80)  # Connecting to 192.168.1.1 :80
+connect("192.168.1.1", 80)       # Connecting to 192.168.1.1 :80
 ```
 
 ### *args and **kwargs
 
 ```python
 # *args — collect extra positional args as a tuple
-def total(*args: float) -> float:
-    return sum(args)
+def order(food:str,*topings:str) -> None:
+    print(f"You get {food} With:" ,end=" ")
+    for top in topings:
+        print(f"{top}",end="-")
 
-total(1, 2, 3, 4)   # 10.0
+order("Pizza", "Pinapple", "tomato", "milk")    # You get Pizza With: Pinapple-tomato-milk-
+
+
 
 # **kwargs — collect extra keyword args as a dict
 def log_event(**kwargs) -> None:
-    for key, value in kwargs.items():
+    for key, value in kwargs.items():   # Unpacking
         print(f"{key}: {value}")
 
 log_event(level="INFO", service="ec2", message="Instance started")
+# level: INFO
+# service: ec2
+# message: Instance started
 ```
 
 ### Unpacking into a function call
@@ -288,8 +295,9 @@ connect(**config)   # unpacks dict as keyword args
 Small, anonymous, single-expression functions. Most useful as sort keys.
 
 ```python
-# Sort a list of dicts by a field
-# Will return the statement result.
+lambda <parameters> : <expression to return>
+
+# Typically used to sort a list of dicts by a field
 instances = [{"id": "i-3", "cpu": 80}, {"id": "i-1", "cpu": 20}]
 instances.sort(key=lambda x: x["cpu"])
 ```
@@ -309,68 +317,75 @@ regions[-1]       # "eu-west-1"
 regions[0:2]      # ["us-east-1", "us-west-2"]  (slicing)
 
 # Modify
-regions.append("ap-south-1")
-regions.insert(1, "ca-central-1")
-regions.remove("us-west-2")
-popped = regions.pop()
-del regions[0]
+regions.append("ap-south-1")    # Append ap-south-1 to the end
+regions.insert(1, "ca-central-1")   # Insert ca-central-1 at index 1
+regions.remove("us-west-2") # Removes by value
+del regions[0]      # Removes by index
+popped = regions.pop(0)      # Removes by index(default last) and returns it
+popped = regions.pop(regions.index("us-west-2"))  # Removes by value, and returns it
 
 # Useful
-len(regions)
-regions.sort()
+regions.index("us-east-1")  # Returns index of us-east-1
+len(regions)    # Length of regions
+regions.sort()  # Sorts the region list (default ascending order)
 "us-east-1" in regions   # True
 ```
 
-### Tuple — ordered, immutable
+### Tuple — ordered, immutable (hashable)
 
 ```python
 endpoint = ("https://api.example.com", 443)
 host, port = endpoint   # unpacking
 
 # Tuples are hashable — can be used as dict keys
+# Hashing means converting a value into a fixed number(a hash) to store and find it quickly.
 cache = {("us-east-1", "ec2"): "data"}
+# Tuples are immutable, so dict key hash won't change.
 ```
 
-### Set — unordered, unique elements
+### Set — unordered, unique elements (hashed)
 
 ```python
-active = {"ec2", "s3", "ec2"}   # {"ec2", "s3"}
+active = {"ec2", "s3", "ec2"}   # duplicates are dropped → {"ec2", "s3"}
 
-active.add("lambda")
-active.discard("s3")
-"ec2" in active    # True  (O(1) lookup)
+active.add("lambda")      # adds "lambda" to the set
+active.discard("s3")      # removes "s3" (no error if it doesn't exist)
+active.remove("s3")       # removes "s3" (raises KeyError if it doesn't exist)
+"ec2" in active           # True  (O(1) lookup)
 
 # Set operations — useful for diffing resource lists
 deployed = {"ec2", "rds", "s3"}
 expected = {"ec2", "s3", "lambda"}
-missing  = expected - deployed    # {"lambda"}
-extra    = deployed - expected    # {"rds"}
+missing  = expected - deployed    # in expected but not deployed → {"lambda"}
+extra    = deployed - expected    # in deployed but not expected → {"rds"}
 ```
 
-### Dictionary — key-value store
+### Dictionary — key-value pair
 
 ```python
 instance = {"id": "i-abc123", "type": "t3.micro", "state": "running"}
 
 # Access
-instance["id"]                      # "i-abc123"
-instance.get("region", "unknown")   # "unknown" (safe, with default)
+instance["id"]                      # "i-abc123" — access value by key
+instance.get("region", "unknown")   # access value of region, if not found return unknown
 
 # Modify
-instance["state"] = "stopped"
-instance.update({"region": "us-east-1", "az": "us-east-1a"})
-del instance["az"]
+instance["state"] = "stopped"                           # update existing key
+instance["zone"] = "us-east-1a"                         # add new key
+instance.update({"region": "us-east-1", "az": "us-east-1a"})  # add/update multiple at once
+del instance["az"]                                      # remove a key (KeyError if missing)
 
 # Iterate
-for key in instance:
-for value in instance.values():
-for key, value in instance.items():
+for key in instance:                  # loops over keys
+for value in instance.values():       # loops over values
+for key, value in instance.items():   # loops over both (most common)
 
 # Check membership
-"id" in instance    # True (checks keys only)
+"id" in instance    # True — checks keys only, not values
 
-# Dict comprehension
+# Dict comprehension — build a dict from a list of pairs
 env_map = {k: v for k, v in [("DB_HOST", "localhost"), ("PORT", "5432")]}
+# {"DB_HOST": "localhost", "PORT": "5432"}
 ```
 
 ### Comprehensions
