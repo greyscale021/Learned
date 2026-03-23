@@ -110,7 +110,7 @@ def greet(name: str, times: int = 1) -> str:
 ```
 
 ### String formatting
-> Note:Strings are immutable, so we can't change it, (.) methods creates new strings.
+> Note: Strings are immutable, so we can't change it, (.) methods creates new strings.
 
 ```python
 name, score = "Alice", 98.67
@@ -154,11 +154,21 @@ f"{42:05d}"                     # "00042"   — zero padded
 "hello".islower()   # True
 "HELLO".isupper()   # True
 ```
+
 ---
 
 ## 3. Control Flow
 
 ### if / elif / else
+```python
+# Syntax
+if <condition>:
+    <statement>
+elif <condition>:
+    <statement>
+else:
+    <statement>
+```
 
 ```python
 score = int(input())
@@ -174,9 +184,13 @@ else:
 ```
 
 ### Ternary (inline if)
+```python
+# Syntax
+value_if_true if condition else value_if_false
+```
 
 ```python
-status = "adult" if age >= 18 else "minor"
+grade = "A" if score >= 90 else "not A"
 ```
 
 ### for loop (Used on iterables)
@@ -196,7 +210,7 @@ for i in range(0, 10, 2):   # start, stop, step
     print(i)                 # 0 2 4 6 8
 ```
 
-### while loop (Loop pressists until condition is false )
+### while loop (Loop pressists until condition is false)
 
 ```python
 retries = 0
@@ -238,7 +252,7 @@ match command:
 
 ## 4. Functions
 
-Functions are **first-class objects**(can be passed around) in Python — they can be assigned to variables, passed as arguments, and returned from other functions.
+Functions are **first-class objects** (can be passed around) in Python — they can be assigned to variables, passed as arguments, and returned from other functions.
 
 ### Basic definition
 
@@ -263,13 +277,12 @@ connect("192.168.1.1", 80)       # Connecting to 192.168.1.1 :80
 
 ```python
 # *args — collect extra positional args as a tuple
-def order(food:str,*topings:str) -> None:
-    print(f"You get {food} With:" ,end=" ")
-    for top in topings:
-        print(f"{top}",end="-")
+def order(food: str, *toppings: str) -> None:
+    print(f"You get {food} With:", end=" ")
+    for top in toppings:
+        print(f"{top}", end="-")
 
-order("Pizza", "Pinapple", "tomato", "milk")    # You get Pizza With: Pinapple-tomato-milk-
-
+order("Pizza", "Pineapple", "tomato", "milk")    # You get Pizza With: Pineapple-tomato-milk-
 
 
 # **kwargs — collect extra keyword args as a dict
@@ -292,14 +305,20 @@ connect(**config)   # unpacks dict as keyword args
 
 ### Lambda functions
 
-Small, anonymous, single-expression functions. Most useful as sort keys.
+Anonymous single-expression functions — used inline where a full `def` would be overkill.
 
 ```python
+# Syntax
 lambda <parameters> : <expression to return>
+```
 
-# Typically used to sort a list of dicts by a field
+```python
+# Sort a list of dicts by a field
 instances = [{"id": "i-3", "cpu": 80}, {"id": "i-1", "cpu": 20}]
 instances.sort(key=lambda x: x["cpu"])
+# key= tells sort what value to extract from each item for comparison
+# lambda x: x["cpu"] — for each dict x, return the cpu value
+# result: [{"id": "i-1", "cpu": 20}, {"id": "i-3", "cpu": 80}]
 ```
 
 ---
@@ -319,16 +338,17 @@ regions[0:2]      # ["us-east-1", "us-west-2"]  (slicing)
 # Modify
 regions.append("ap-south-1")    # Append ap-south-1 to the end
 regions.insert(1, "ca-central-1")   # Insert ca-central-1 at index 1
-regions.remove("us-west-2") # Removes by value
-del regions[0]      # Removes by index
-popped = regions.pop(0)      # Removes by index(default last) and returns it
+regions.remove("us-west-2")     # Removes by value
+del regions[0]                  # Removes by index
+popped = regions.pop()          # Removes and returns last item (default)
+popped = regions.pop(0)         # Removes and returns item at index 0
 popped = regions.pop(regions.index("us-west-2"))  # Removes by value, and returns it
 
 # Useful
 regions.index("us-east-1")  # Returns index of us-east-1
-len(regions)    # Length of regions
-regions.sort()  # Sorts the region list (default ascending order)
-"us-east-1" in regions   # True
+len(regions)                 # Length of regions
+regions.sort()               # Sorts the region list (default ascending order)
+"us-east-1" in regions       # True
 ```
 
 ### Tuple — ordered, immutable (hashable)
@@ -343,7 +363,7 @@ cache = {("us-east-1", "ec2"): "data"}
 # Tuples are immutable, so dict key hash won't change.
 ```
 
-### Set — unordered, unique elements (hashed)
+### Set — unordered, mutable, unique elements
 
 ```python
 active = {"ec2", "s3", "ec2"}   # duplicates are dropped → {"ec2", "s3"}
@@ -367,13 +387,13 @@ instance = {"id": "i-abc123", "type": "t3.micro", "state": "running"}
 
 # Access
 instance["id"]                      # "i-abc123" — access value by key
-instance.get("region", "unknown")   # access value of region, if not found return unknown
+instance.get("region", "unknown")   # access value of region, if not found, return unknown
 
 # Modify
-instance["state"] = "stopped"                           # update existing key
-instance["zone"] = "us-east-1a"                         # add new key
+instance["state"] = "stopped"                          # update existing key
+instance["zone"] = "us-east-1a"                        # add new key
 instance.update({"region": "us-east-1", "az": "us-east-1a"})  # add/update multiple at once
-del instance["az"]                                      # remove a key (KeyError if missing)
+del instance["az"]                                     # remove a key (KeyError if missing)
 
 # Iterate
 for key in instance:                  # loops over keys
@@ -390,21 +410,37 @@ env_map = {k: v for k, v in [("DB_HOST", "localhost"), ("PORT", "5432")]}
 
 ### Comprehensions
 
-A concise, readable way to build collections.
+A shorter way to build collections from loops — replaces a loop + append with a single readable line.
 
 ```python
-# List comprehension
+# Syntax
+[<expression> for <item> in <iterable> if <condition>]      # list
+{<key>: <value> for <item> in <iterable>}                   # dict
+(<expression> for <item> in <iterable>)                     # generator (lazy)
+```
+
+```python
+instances = [
+    {"id": "i-1", "state": "running", "cost": 10},
+    {"id": "i-2", "state": "stopped", "cost": 5},
+    {"id": "i-3", "state": "running", "cost": 20},
+]
+
+# List comprehension — filter
 running = [i for i in instances if i["state"] == "running"]
-ids     = [i["id"] for i in instances]
+# [{"id": "i-1", ...}, {"id": "i-3", ...}]
 
-# Nested
-all_tags = [tag for inst in instances for tag in inst.get("tags", [])]
+# List comprehension — extract field
+ids = [i["id"] for i in instances]
+# ["i-1", "i-2", "i-3"]
 
-# Dict comprehension
-id_to_type = {i["id"]: i["type"] for i in instances}
+# Dict comprehension — build id → state map
+id_to_state = {i["id"]: i["state"] for i in instances}
+# {"i-1": "running", "i-2": "stopped", "i-3": "running"}
 
-# Generator expression (lazy — doesn't build a list in memory)
+# Generator expression — lazy, no list built in memory
 total_cost = sum(i["cost"] for i in instances)
+# 35
 ```
 
 ---
@@ -488,18 +524,32 @@ log_file = Path("logs") / "2024" / "app.log"
 
 ## 7. Error Handling
 
-### try / except / else / finally
+Wrap risky code in `try` — Python jumps to the matching `except` block if something goes wrong instead of crashing.
+
+```python
+# Syntax
+try:
+    <risky code>
+except <ExceptionType>:
+    <handle it>
+except <ExceptionType> as e:
+    <handle it, e holds the error message>
+else:
+    <runs only if no exception was raised>
+finally:
+    <always runs — cleanup goes here>
+```
 
 ```python
 try:
     result = int(input("Enter a number: "))
     print(10 / result)
 except ValueError:
-    print("That's not a valid number.")
+    print("That's not a valid number.")       # wrong value type
 except ZeroDivisionError:
-    print("Cannot divide by zero.")
+    print("Cannot divide by zero.")           # division by zero
 except Exception as e:
-    print(f"Unexpected error: {e}")
+    print(f"Unexpected error: {e}")           # catch-all for anything else
 else:
     print("Success!")       # runs only if no exception was raised
 finally:
@@ -507,6 +557,8 @@ finally:
 ```
 
 ### Raising exceptions
+
+Manually throw an exception when input is invalid — stops bad data early.
 
 ```python
 def set_port(port: int) -> None:
@@ -536,35 +588,49 @@ def set_port(port: int) -> None:
 
 ## 8. OOP Basics
 
-You'll mostly *read* OOP when working with SDKs like boto3, not write complex class hierarchies. Know enough to understand what you're looking at and write simple classes when needed.
+A class is a blueprint — it defines attributes (data) and methods (behavior) that each object created from it will have.
+
+> You'll mostly *read* OOP when working with SDKs like boto3, not write complex class hierarchies. Know enough to understand what you're looking at and write simple classes when needed.
+
+```python
+# Syntax
+class <ClassName>:
+    def __init__(self, <params>) -> None:   # constructor — runs when object is created
+        self.<attribute> = <value>          # self = the object being created
+
+    def <method>(self) -> None:             # method — a function belonging to the class
+        ...
+```
 
 ### Basic class
 
 ```python
 class EC2Instance:
     def __init__(self, instance_id: str, instance_type: str) -> None:
-        self.instance_id   = instance_id
+        self.instance_id   = instance_id    # store as attribute on the object
         self.instance_type = instance_type
-        self.state         = "stopped"
+        self.state         = "stopped"      # default value
 
     def start(self) -> None:
-        self.state = "running"
+        self.state = "running"              # modify the object's own attribute
         print(f"{self.instance_id} is now running.")
 
     def stop(self) -> None:
         self.state = "stopped"
         print(f"{self.instance_id} is now stopped.")
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:              # controls what print(obj) shows
         return f"EC2Instance(id={self.instance_id!r}, state={self.state!r})"
 
 
-inst = EC2Instance("i-abc123", "t3.micro")
+inst = EC2Instance("i-abc123", "t3.micro")  # creates an object from the class
 inst.start()
 print(inst)   # EC2Instance(id='i-abc123', state='running')
 ```
 
 ### Inheritance
+
+A child class inherits everything from the parent and can override or extend it.
 
 ```python
 class AWSResource:
@@ -576,12 +642,12 @@ class AWSResource:
         return f"{self.resource_id} in {self.region}"
 
 
-class S3Bucket(AWSResource):
+class S3Bucket(AWSResource):                        # S3Bucket inherits from AWSResource
     def __init__(self, name: str, region: str) -> None:
-        super().__init__(name, region)
+        super().__init__(name, region)              # call parent's __init__
         self.name = name
 
-    def describe(self) -> str:
+    def describe(self) -> str:                      # override parent's describe
         return f"S3 Bucket: {self.name} ({self.region})"
 
 
@@ -607,10 +673,16 @@ print(instance.instance_type)
 
 ## 9. Regular Expressions
 
-Essential for parsing logs, scraping config files, and validating inputs in scripts.
+A way to search, match, and manipulate text using patterns instead of exact strings — essential for parsing logs and validating inputs.
 
 ```python
 import re
+
+# Syntax
+re.search(pattern, string)            # first match anywhere → match object or None
+re.findall(pattern, string)           # all matches → list
+re.sub(pattern, replacement, string)  # replace matches → new string
+re.match(pattern, string)             # match at start of string only
 ```
 
 ### Common patterns
@@ -667,10 +739,16 @@ with open("app.log") as f:
 
 ## 10. subprocess
 
-Run shell commands from Python. The backbone of any cloud automation or deployment script.
+Run shell commands from Python — the backbone of any cloud automation or deployment script.
 
 ```python
 import subprocess
+
+# Syntax
+subprocess.run(<cmd_as_list>, capture_output=True, text=True, check=False)
+# capture_output=True  → capture stdout and stderr instead of printing them
+# text=True            → return output as string instead of bytes
+# check=True           → raise CalledProcessError if command exits non-zero
 ```
 
 ### Run a command
@@ -893,7 +971,7 @@ students = [("Alice", 90), ("Bob", 75), ("Eve", 85)]
 students.sort(key=lambda s: s[1], reverse=True)   # by score, descending
 
 # sorted() returns a new list — doesn't modify original
-top3 = sorted(scores, reverse=True)[:3]
+top3 = sorted(students, key=lambda s: s[1], reverse=True)[:3]
 ```
 
 ### Comprehensions & generator expressions
@@ -906,6 +984,7 @@ evens        = [x for x in range(20) if x % 2 == 0]
 flat = [n for row in [[1,2],[3,4]] for n in row]   # [1, 2, 3, 4]
 
 # Dict comprehension
+s = "hello world"
 freq = {ch: s.count(ch) for ch in set(s)}
 
 # Generator expression — no list built in memory
