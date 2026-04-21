@@ -278,6 +278,11 @@ cat <file> <another-file>    # Concatenate two files as stdout
 ### `less` (View large files)
 ```bash
 less <file> # View content of file with pagination(in pages)
+# q → quit
+# j / k → scroll down/up
+# space → next page
+# /word → search
+# n → next match
 ```
 ### `head`
 ```bash
