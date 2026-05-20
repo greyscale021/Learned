@@ -285,11 +285,11 @@ cat <file> <another-file>    # Concatenate two files as stdout
 ### `less` (View large files)
 ```bash
 less <file> # View content of file with pagination(in pages)
-# q → quit
-# j / k → scroll down/up
-# space → next page
-# /word → search
-# n → next match
+# q: quit
+# j/k: scroll down/up
+# space: next page
+# /word: search
+# n: next match
 ```
 ### `head`
 ```bash
@@ -675,11 +675,14 @@ sudo systemctl status ssh   # confirm status
 
 ### Step 2: Connect With Password (First Time)
 
-Get the server's IP and username from the server machine:
+From the server:
+
+Get the server's IP and username from the server machine and check if password authentication is enabled.
 
 ```bash
 ip a       # find the 192.168.x.x address
 whoami     # confirm the username
+sudo nano /etc/ssh/sshd_config  # Find "PasswordAuthentication"
 ```
 
 From the client:
@@ -688,15 +691,14 @@ From the client:
 ssh username@192.168.x.x
 ```
 
-First connection → server sends fingerprint → you type `yes` → saved to `known_hosts` → enter password(the server machines) → you're in.
+First connection → server sends fingerprint → you type `yes` → saved to `known_hosts` → enter password(the server machines)
 
 ### Step 3: Set Up Key-Based Login
 
 On the client, generate a key pair:
 
 ```bash
-ssh-keygen -t ed25519        # recommended — modern, fast, secure
-# Press Enter to accept default save location (~/.ssh/id_ed25519)
+ssh-keygen -t ed25519   # Press Enter to accept default save location (~/.ssh/id_ed25519)
 # Passphrase is optional but adds an extra layer of protection
 ssh-keygen -t ed25519 -f /path/to/directory/key_name    # -f flag for selecting path manually 
 ```
@@ -777,7 +779,7 @@ Now just type:
 ssh <name>      # You will be logged in, equivalent to "ssh user@ip"
 ```
 
-Essential once you're managing multiple servers.
+Essential when managing multiple servers.
 
 ---
 

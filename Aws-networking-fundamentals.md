@@ -1,0 +1,417 @@
+# AWS Networking Fundamentals
+
+All of cloud networking:
+
+- *Who can access this?*
+- *How does traffic move?*
+- *How do we keep it secure?*
+
+## Part 1: Internet Basics
+
+### IP Address
+
+An IP address is a unique address for a device on a network. Like a house address, for computers. Example:
+
+```
+192.168.1.10
+```
+
+Without IP addresses, computers can't find each other.
+
+
+**Public IP**: Visible and reachable from the internet.
+
+> Metaphor: A storefront address anyone can walk up to.
+
+**Private IP**: Only works inside a private network, invisible to the outside world.
+
+> Metaphor: A room number inside a building, meaningless to someone outside.
+
+---
+
+### Public vs. Private Servers
+
+**Public server**: exposed to the internet (web servers, load balancers, public APIs).
+
+**Private server**: hidden from the internet (databases, internal services, backend logic).
+
+---
+
+### Subnet
+
+A subnet is a smaller, isolated section of a larger network.
+
+> Metaphor: **Network = City**, **Subnet = Neighborhood**
+
+- **Public subnet** - holds resources that need internet access
+- **Private subnet** - holds resources that should stay internal
+
+---
+
+### CIDR (Classless Inter-Domain Routing )
+
+CIDR notation defines how large a network is.
+
+```
+10.0.0.0/16
+```
+
+The number after the `/` controls size:
+
+| CIDR | Network Size |
+|------|-------------|
+| `/16` | Large (65,536 addresses) |
+| `/24` | Medium (256 addresses) |
+| `/32` | Single IP address |
+
+Rule of thumb: **smaller number = bigger network**.
+
+---
+
+### DNS (Domain Name System)
+
+DNS translates human-readable names into IP addresses that computers actually use.
+
+```
+google.com  →  142.250.80.46
+```
+
+> Metaphor: DNS is the internet's contact book. Look up a name, it gives the number.
+
+---
+
+### HTTP vs. HTTPS
+
+| Protocol | What it is |
+|----------|-----------|
+| HTTP | Regular web traffic (unencrypted) |
+| HTTPS | Encrypted web traffic (HTTP + TLS) |
+
+Modern applications use HTTPS because with HTTP anyone between user and the server can read traffic.
+
+---
+
+### Ports
+
+A port is a specific entry point on a server.
+
+| Port | Purpose |
+|------|---------|
+| 80 | HTTP |
+| 443 | HTTPS |
+| 22 | SSH (remote terminal access) |
+
+> Metaphor: **IP address = apartment building**, **port = individual apartment door**.
+
+---
+
+### Routing
+
+Routing is the process of deciding where traffic should go, which path a packet takes to reach its destination.
+
+> Metaphor: Google Maps for internet traffic where the route table is the map.
+
+---
+
+### Firewalls
+
+A firewall decides what traffic is allowed in or out of a network or server.
+
+In AWS, firewalls come in two forms: **Security Groups** and **NACLs**
+
+---
+
+## Part 2 - AWS Networking
+
+### VPC (Virtual Private Cloud)
+
+A VPC is a private, isolated network inside AWS.
+
+```
+AWS Account
+ └── VPC  (your private network)
+      ├── Public Subnet  (internet-facing)
+      ├── Private Subnet (internal only)
+      └── Your resources (EC2, RDS, etc.)
+```
+
+Inside a VPC you control: IP ranges, subnets, routing, and security rules.
+
+---
+
+### Public & Private Subnets
+
+This is the most fundamental architectural pattern in AWS.
+
+**Public subnet** - connected to the internet via an Internet Gateway. Holds anything that needs to be publicly reachable (load balancers, public servers).
+
+**Private subnet** - no direct internet connection. Holds anything that should stay internal (databases, backend services).
+
+A typical real-world architecture looks like this:
+
+```
+Internet
+   ↓
+Load Balancer        ← Public Subnet
+   ↓
+Application Server   ← could be public or private
+   ↓
+Database             ← Private Subnet
+```
+
+Users hit the load balancer. The load balancer talks to the app and the app talks to the database. The database is never directly reached from outside.
+
+---
+
+### IGW (Internet Gateway)
+
+An Internet Gateway is a 1:1 bi-directional (two-way) bridge.
+
+| Direction | Allowed? |
+|-----------|---------|
+| Private server → Internet | Yes |
+| Internet → Private server | Yes |
+
+The Internet Gateway is the door between VPC and the internet. Without it, nothing in a VPC can reach the public internet, and nothing outside can reach in.
+
+```
+VPC  →  Internet Gateway  →  Internet
+```
+
+A public subnet is "public" precisely because its route table points to an Internet Gateway.
+
+---
+
+### Route Tables
+
+A route table is a set of rules that tells traffic where to go, every subnet has one.
+
+Example rule:
+
+```
+0.0.0.0/0  →  Internet Gateway
+```
+
+This means: "send all traffic destined for the internet through the IGW." That's what makes a subnet public.
+
+Private subnets have route tables that don't point to an IGW - so they can't be reached from the internet directly.
+
+---
+
+### NAT Gateway
+
+One of the trickier concepts, but important.
+
+**The problem:** A private server sometimes needs to reach the internet (e.g., downloading software updates), but you still don't want anyone from the internet to reach that server directly.
+
+**The solution:** NAT Gateway sits in a public subnet and acts as a middleman.
+
+| Direction | Allowed? |
+|-----------|---------|
+| Private server → Internet | Yes |
+| Internet → Private server | No |
+
+The private server's requests go out through the NAT Gateway. Responses come back through it too. But no one outside can initiate a connection in.
+
+> Metaphor: a one-way valve. Traffic can flow out, but nothing gets in uninvited.
+
+---
+
+### Security Groups
+
+Security Groups are the primary firewall in AWS, applied at the **instance level** (per EC2 instance, RDS instance, etc.).
+
+You define rules like:
+
+```
+Inbound:
+  Allow port 443 from anywhere       (HTTPS traffic in)
+  Allow port 22 from 203.0.113.5     (SSH from 203.0.113.5 IP only)
+
+Outbound:
+  Allow all traffic                  (default)
+```
+
+**Key concept - Stateful:**
+
+If you allow inbound traffic on port 443, the response automatically goes back out without needing a separate outbound rule. The Security Group tracks the connection state.
+
+> Metaphor: a smart bouncer who remembers faces. If they let you in, they'll let you out.
+
+---
+
+### NACLs (Network Access Control Lists)
+
+NACLs are an additional firewall layer, but they operate at the **subnet level**.
+
+**Key concept - Stateless:**
+
+NACLs don't track connection state. If you allow inbound traffic, you must also explicitly allow the return traffic outbound. Both directions need rules.
+
+> Metaphor: a less smart bouncer who doesn't remembers faces. He has to be told who to let in and also who to let out.
+
+**Security Groups vs. NACLs at a glance:**
+
+| Feature | Security Groups | NACLs |
+|---------|----------------|-------|
+| Applied to | Individual instances | Entire subnets |
+| State | Stateful | Stateless |
+| Default behavior | Deny all inbound | Allow all (default NACL) |
+| Primary use | Main firewall | Extra subnet-level filter |
+| Rule evaluation | All rules checked | Rules checked in number order |
+
+For most use cases, Security Groups alone are sufficient. NACLs are an extra layer for stricter environments.
+
+---
+
+### Load Balancer
+
+A Load Balancer sits in front and distributes incoming traffic across multiple instances.
+
+With one:
+
+```
+10,000 users
+      ↓
+ Load Balancer
+  ↙    ↓    ↘
+ S1   S2   S3   ← traffic spread evenly
+```
+
+Without one:
+
+```
+10,000 users  →  1 overloaded server
+```
+
+Benefits: **scalability** (handle more traffic), **high availability** (if one server dies, others keep running), **fault tolerance** (no single point of failure).
+
+---
+
+## Part 3 - How It All Fits Together
+
+### The Full AWS Security Layer Model
+
+Security in AWS is a stack of layers.
+
+```
+┌──────────────────────────────────────────┐
+│  Layer 1: Edge                           │
+│  AWS Shield (DDoS protection) & WAF      │
+│  Filters malicious traffic globally      │
+└─────────────────────┬────────────────────┘
+                      ↓
+┌──────────────────────────────────────────┐
+│  Layer 2: Network Gateway                │
+│  Internet Gateway + Route Tables         │
+│  Controls what can enter/exit the VPC    │
+└─────────────────────┬────────────────────┘
+                      ↓
+┌──────────────────────────────────────────┐
+│  Layer 3: Subnet                         │
+│  NACLs                                   │
+│  Filters traffic at the subnet boundary  │
+└─────────────────────┬────────────────────┘
+                      ↓
+┌──────────────────────────────────────────┐
+│  Layer 4: Instance                       │
+│  Security Groups                         │
+│  Filters traffic per individual resource │
+└─────────────────────┬────────────────────┘
+                      ↓
+┌──────────────────────────────────────────┐
+│  Layer 5: OS / Application               │
+│  iptables, app-level auth, encryption    │
+│  Last line of defense on the machine     │
+└──────────────────────────────────────────┘
+```
+
+---
+
+### Typical Architecture - How Everything Connects
+
+```
+Internet
+   ↓
+[Internet Gateway]
+   ↓
+[Load Balancer]  ← Public Subnet  ← Security Group (allows 80/443)
+   ↓
+[App Servers]    ← Private Subnet ← Security Group (allows from LB only)
+   ↓
+[Database]       ← Private Subnet ← Security Group (allows from app only)
+
+      ↑
+[NAT Gateway]   ← Lets private servers reach internet for updates but blocks inbound connections from internet
+                   
+```
+
+This is a standard 3-tier architecture.
+
+---
+
+## Quick Reference Cheat Sheet
+
+### Core Concepts
+
+| Concept | One-Line Summary |
+|---------|-----------------|
+| IP Address | Unique address for a device on a network |
+| Public IP | Reachable from the internet |
+| Private IP | Only reachable inside a private network |
+| DNS | Translates domain names to IP addresses |
+| Port | A specific entry point on a server (80=HTTP, 443=HTTPS, 22=SSH) |
+| CIDR | Defines network size, smaller number = bigger network |
+| Routing | Rules that decide where traffic is sent |
+| Firewall | Gatekeeper that controls what traffic is allowed |
+
+### AWS-Specific Concepts
+
+| Concept | One-Line Summary |
+|---------|-----------------|
+| VPC | Your private isolated network inside AWS |
+| Public Subnet | Has a route to the internet via IGW |
+| Private Subnet | No direct internet access |
+| Internet Gateway | The door between your VPC and the internet |
+| Route Table | Rules that tell traffic where to go |
+| NAT Gateway | Lets private servers reach internet - blocks inbound |
+| Security Group | Instance-level firewall - **stateful** |
+| NACL | Subnet-level firewall - **stateless** |
+| Load Balancer | Distributes traffic across multiple servers |
+
+### Key Comparisons
+
+| | Security Group | NACL |
+|-|---------------|------|
+| Level | Instance | Subnet |
+| State | Stateful | Stateless |
+| Direction | Inbound + outbound | Both must be set manually |
+| Use | Always | Extra hardening |
+
+| | Internet Gateway | NAT Gateway |
+|-|-----------------|-------------|
+| Purpose | Connects VPC to internet | Lets private servers reach internet |
+| Inbound allowed? | Yes | No |
+| Lives in | VPC-level | Public subnet |
+| Used by | Public subnets | Private subnets |
+
+### Common Port Numbers
+
+| Port | Protocol | Used for |
+|------|----------|---------|
+| 22 | SSH | Remote server access |
+| 80 | HTTP | Unencrypted web traffic |
+| 443 | HTTPS | Encrypted web traffic |
+| 3306 | MySQL | Database connections |
+| 5432 | PostgreSQL | Database connections |
+
+### CIDR Quick Reference
+
+| CIDR | Approx. Addresses | Use case |
+|------|-------------------|---------|
+| `/16` | 65,536 | Large VPC |
+| `/24` | 256 | Typical subnet |
+| `/28` | 16 | Small subnet |
+| `/32` | 1 | Single IP |
+
+---

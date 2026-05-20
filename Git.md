@@ -3,7 +3,7 @@
 <details>
   <summary><strong>Learning Path</strong></summary>
 
-**Tier 1 — Foundation**
+**Tier 1 - Foundation**
 
 1. [Starting with Local Repository](#1-starting-with-local-repository)
 2. [Tracking Changes in Local Repo](#2-tracking-changes-in-local-repo)
@@ -11,7 +11,7 @@
 4. [Remote Repository](#4-remote-repository)
 5. [.gitignore](#5-gitignore)
 
-**Tier 2 — Daily Use**
+**Tier 2 - Daily Use**
 
 6. [Reverting or Resetting Changes](#6-reverting-or-resetting-changes)
 7. [Git Log & History](#7-git-log--history)
@@ -19,9 +19,9 @@
 9. [Merge Conflicts](#9-merge-conflicts)
 10. [Useful One-Liners & Aliases](#10-useful-one-liners--aliases)
 
-**Tier 3 — Team & Production Workflows**
+**Tier 3 - Team & Production Workflows**
 
-11. [Advanced Features — Diff, Stash, Rebase](#11-advanced-features--diff-stash-rebase)
+11. [Advanced Features - Diff, Stash, Rebase](#11-advanced-features--diff-stash-rebase)
 12. [Tags & Releases](#12-tags--releases)
 13. [Detached HEAD](#13-detached-head)
 14. [Force Push Recovery](#14-force-push-recovery)
@@ -43,12 +43,12 @@
 1. This document assumes you've already done a basic Git tutorial.
 2. Most Git commands act on your **current branch** by default.
 3. Key terms:
-    - **HEAD** — Points to the last commit on your current branch. Think of it as "where you are right now."
-    - **Working Directory** — What's currently in your file system / editor, including unsaved or unstaged edits.
-    - **Staging Area (Index)** — A middle zone between your editor and a commit. Files go here with `git add` before being committed.
-    - **Origin** — The default name for a remote repository.
-    - **Tracked file** — A file Git is aware of (was added or committed at least once). Untracked files are invisible to Git.
-    - **Upstream** — The remote branch your local branch is linked to, used by `push` and `pull` by default.
+    - **HEAD** - Points to the last commit on your current branch. Think of it as "where you are right now."
+    - **Working Directory** - What's currently in your file system / editor, including unsaved or unstaged edits.
+    - **Staging Area (Index)** - A middle zone between your editor and a commit. Files go here with `git add` before being committed.
+    - **Origin** - The default name for a remote repository.
+    - **Tracked file** - A file Git is aware of (was added or committed at least once). Untracked files are invisible to Git.
+    - **Upstream** - The remote branch your local branch is linked to, used by `push` and `pull` by default.
 
 </details>
 
@@ -58,7 +58,7 @@
 
 Set up a local Git repository from scratch, or configure your identity before making commits.
 
-- **Set up Git identity** — Git tags every commit with your name and email. Set this once globally.
+- **Set up Git identity** - Git tags every commit with your name and email. Set this once globally.
     ```bash
     git config --global user.name "Your Name"
     git config --global user.email "you@example.com"
@@ -69,7 +69,7 @@ Set up a local Git repository from scratch, or configure your identity before ma
     git init
     ```
 
-- **Check repository status** — shows what's staged, unstaged, and untracked.
+- **Check repository status** - shows what's staged, unstaged, and untracked.
     ```bash
     git status
     ```
@@ -80,28 +80,28 @@ Set up a local Git repository from scratch, or configure your identity before ma
 
 Once a repo is initialized, you track changes in a three-step cycle: **edit → stage → commit**.
 
-- **Stage files** — Move changes into the staging area, ready to be committed.
+- **Stage files** - Move changes into the staging area, ready to be committed.
     ```bash
     git add <file>        # Stage a specific file
     git add .             # Stage everything in current directory and subdirectories
     git add --all         # Stage all changes including deletions, anywhere in the repo
     ```
 
-- **Unstage files** — Remove from staging area without discarding your edits.
+- **Unstage files** - Remove from staging area without discarding your edits.
     ```bash
     git restore --staged <file>   # Unstage a specific file
     git restore --staged .        # Unstage everything
     ```
-> Tip — If you hadn't commited yet, it's your first add, to ustage use "git reset &lt;file&gt;"
+> Tip - If you hadn't commited yet, it's your first add, to ustage use "git reset &lt;file&gt;"
 
-- **Commit changes** — Save a snapshot of the staged files to history.
+- **Commit changes** - Save a snapshot of the staged files to history.
     ```bash
     git commit -m "your message here" -m "Description here"     # Commit with title and description.
     git commit -am "message"      # stage all and commit in one step. Only stage tracked file, does not stage new/untracked files      
     git commit      # For using a editor to write  title and desctiption.
     ```
 
-> **Tip — Write good commit messages.** Use the imperative form: `"Add login route"` not `"Added login route"`. One line for small changes; use a body for complex ones. Good history makes debugging much easier later.
+> **Tip - Write good commit messages.** Use the imperative form: `"Add login route"` not `"Added login route"`. One line for small changes; use a body for complex ones. Good history makes debugging much easier later.
 
 - **Untrack files**
     ```bash
@@ -166,7 +166,7 @@ Connect your local repo to a hosted remote (GitHub, GitLab, etc.) to back up cod
     git push -u origin <branch>   # Push branch + set upstream (do this once per branch)
     git push                      # Push to the tracked upstream (after -u is set)
     git push --all                # Push all local branches to remote
-    git push --force-with-lease   # Force push safely — fails if remote has new commits you haven't seen
+    git push --force-with-lease   # Force push safely - fails if remote has new commits you haven't seen
                                   # (safer than --force, use when rebasing a shared branch)
     ```
 
@@ -232,7 +232,7 @@ git rm --cached <file>
 ## 6. Reverting or Resetting Changes
 `Restore`: resets to HEAD, `Reset`: move HEAD and `Revert`: new commit for commit fallback.
 
-### restore — undo local edits
+### restore - undo local edits
 ```bash
 git restore <file>  # Discard unstaged changes of <file> (resets to HEAD)
 git restore .   # Discard all unstaged changes
@@ -240,7 +240,7 @@ git restore --staged <file> # Unstage a staged file (staging area resets to HEAD
 git restore --staged --worktree <file>  # Undo both staged and unstaged changes
 ```
 
-### reset — move HEAD
+### reset - move HEAD
 ```bash
 git reset <file>    # Unstage a file (same as restore --staged)
 
@@ -250,7 +250,7 @@ git reset --hard <commit>   # Move HEAD to <commit>, wipe staging + working dir
 git reset --hard    # Nuke all uncommitted changes
 ```
 
-### revert — undo a commit by a new commit
+### revert - undo a commit by a new commit
 ```bash
 git revert <commit>     # Creates a new commit that undoes the changes made in <commit>
 ```
@@ -272,7 +272,7 @@ git log  # Full commit history with author, date, message
 git shortlog    # Show summary of commits grouped by author
 
 git log --oneline   # Compact view: one commit per line (newest first)
-git log --oneline --graph   # ASCII branch graph — useful for visualizing merges
+git log --oneline --graph   # ASCII branch graph - useful for visualizing merges
 git log --oneline --all     # Include all branches and remotes
 git log --author="name"     # Filter commits by author
 git log -- <file>           # Show commits that touched a specific file
@@ -332,7 +332,7 @@ refactor(db): extract query builder into separate module
 ci: add Docker build step to GitHub Actions
 ```
 
-**Breaking changes** — add `!` after the type or a `BREAKING CHANGE:` footer:
+**Breaking changes** - add `!` after the type or a `BREAKING CHANGE:` footer:
 ```
 feat!: remove deprecated /v1 API endpoints
 
@@ -394,7 +394,7 @@ git diff                # Shows remaining conflicts
 git log --merge         # Shows commits from both branches that caused the conflict
 ```
 
-> **Tip:** If conflicts happen often in the same files, that usually signals a structural problem — two people or features owning the same code. Worth discussing with the team.
+> **Tip:** If conflicts happen often in the same files, that usually signals a structural problem - two people or features owning the same code. Worth discussing with the team.
 
 ---
 
@@ -432,7 +432,7 @@ git config --global --edit  # It will open in default editor
 
 ---
 
-## 11. Advanced Features — Diff, Stash, Rebase
+## 11. Advanced Features - Diff, Stash, Rebase
 
 ### Viewing Diffs
 
@@ -476,11 +476,11 @@ git pull --rebase         # Fetch + rebase instead of fetch + merge
 **Visual:**
 ```
 Before rebase (on feature branch):
-  main:    A — B — C
-  feature: A — B — D — E
+  main:    A - B - C
+  feature: A - B - D - E
 
 After: git rebase main (while on feature):
-  feature: A — B — C — D — E
+  feature: A - B - C - D - E
 ```
 
 > ⚠️ **Never rebase commits that have already been pushed to a shared branch.** It rewrites history, which breaks everyone else's local copies. Rebase is safe on your own local/feature branches only.
@@ -503,12 +503,12 @@ git clean -fd                  # Remove all untracked files and directories (irr
 
 ## 12. Tags & Releases
 
-Tags mark specific commits as significant — usually version releases. CI/CD pipelines often trigger deployments on tag pushes.
+Tags mark specific commits as significant - usually version releases. CI/CD pipelines often trigger deployments on tag pushes.
 
 ```bash
 git tag                           # List all tags
 git tag v1.0.0                    # Create a lightweight tag on current commit
-git tag -a v1.0.0 -m "Release"    # Annotated tag (has author, date, message — preferred)
+git tag -a v1.0.0 -m "Release"    # Annotated tag (has author, date, message - preferred)
 git push origin v1.0.0            # Push a specific tag to remote
 git push origin --tags            # Push all tags to remote
 git tag -d v1.0.0                   # Delete a local tag
@@ -519,7 +519,7 @@ git push origin --delete <tag-name> # Delete a remote tag
 
 ## 13. Detached HEAD
 
-**Detached HEAD** means your `HEAD` is pointing directly to a commit instead of to a branch. You're not "on" any branch — changes you make here won't belong to anything unless you create a branch from this state.
+**Detached HEAD** means your `HEAD` is pointing directly to a commit instead of to a branch. You're not "on" any branch - changes you make here won't belong to anything unless you create a branch from this state.
 
 ### How you get into detached HEAD
 ```bash
@@ -528,18 +528,18 @@ git checkout <commit-hash>          # Old equivalent
 ```
 
 ### What you can do in detached HEAD
-- Look around, run the code, inspect files — completely safe
-- Make experimental commits — they exist but belong to no branch
+- Look around, run the code, inspect files - completely safe
+- Make experimental commits - they exist but belong to no branch
 
 ### How to get back safely
 ```bash
-git switch <branch>    # Go back to <branch> — experimental commits will be garbage collected
+git switch <branch>    # Go back to <branch> - experimental commits will be garbage collected
 ```
 
 ### Save your work from detached HEAD
 If you made commits in detached HEAD that you want to keep:
 ```bash
-git switch -c <new-branch-name>     # Create a branch from current position — your commits are now saved
+git switch -c <new-branch-name>     # Create a branch from current position - your commits are now saved
 ```
 
 > **Rule of thumb:** Detached HEAD is fine for read-only exploration. The moment you want to make changes, create a branch first.
@@ -556,14 +556,14 @@ git push --force-with-lease    # Safer: fails if someone else pushed since your 
                                # Use this instead of --force whenever possible
 ```
 
-### Scenario 1 — You force pushed and want to undo it
+### Scenario 1 - You force pushed and want to undo it
 
 ```bash
 git reflog  # Find the commit remote was on before your force push
 git push origin <commit-hash>:main --force-with-lease  # Restore remote to that commit
 ```
 
-### Scenario 2 — Someone force pushed and your local branch is now behind
+### Scenario 2 - Someone force pushed and your local branch is now behind
 
 ```bash
 git fetch origin
@@ -577,7 +577,7 @@ git reset --hard origin/main
 git rebase origin/main
 ```
 
-### Scenario 3 — You reset --hard and lost commits
+### Scenario 3 - You reset --hard and lost commits
 
 `git reflog` is your safety net. Git keeps a local log of every place HEAD has been, even after resets.
 
@@ -586,9 +586,9 @@ git reflog  # Find the commit hash from before the reset
 git switch -c recovery-branch <commit-hash>     # Create a branch at that commit to recover your work
 ```
 
-> **Reflog is local only** — it doesn't exist on the remote. This is why it can save you after a local `reset --hard`, but not after someone else force pushes and the remote history is gone.
+> **Reflog is local only** - it doesn't exist on the remote. This is why it can save you after a local `reset --hard`, but not after someone else force pushes and the remote history is gone.
 
-### Quick reference — what to do when things go wrong
+### Quick reference - what to do when things go wrong
 
 | Situation | Fix |
 |---|---|
