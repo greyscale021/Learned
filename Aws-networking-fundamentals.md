@@ -10,14 +10,13 @@ All of cloud networking:
 
 ### IP Address
 
-An IP address is a unique address for a device on a network. Like a house address, for computers. Example:
+An IP address is a unique address for a device on a network. Example:
 
 ```
 192.168.1.10
 ```
 
-Without IP addresses, computers can't find each other.
-
+To find each other, computers need IP addresses.
 
 **Public IP**: Visible and reachable from the internet.
 
@@ -25,7 +24,7 @@ Without IP addresses, computers can't find each other.
 
 **Private IP**: Only works inside a private network, invisible to the outside world.
 
-> Metaphor: A room number inside a building, meaningless to someone outside.
+> Metaphor: A room number inside a building. Meaningless for someone outside.
 
 ---
 
@@ -33,7 +32,7 @@ Without IP addresses, computers can't find each other.
 
 **Public server**: exposed to the internet (web servers, load balancers, public APIs).
 
-**Private server**: hidden from the internet (databases, internal services, backend logic).
+**Private server**: hidden from the internet (databases, backend logic).
 
 ---
 
@@ -64,19 +63,19 @@ The number after the `/` controls size:
 | `/24` | Medium (256 addresses) |
 | `/32` | Single IP address |
 
-Rule of thumb: **smaller number = bigger network**.
+> **smaller number = bigger network**.
 
 ---
 
 ### DNS (Domain Name System)
 
-DNS translates human-readable names into IP addresses that computers actually use.
+DNS translates human-readable names into IP addresses that computers use.
 
 ```
-google.com  →  142.250.80.46
+google.com  to  142.250.80.46
 ```
 
-> Metaphor: DNS is the internet's contact book. Look up a name, it gives the number.
+
 
 ---
 
