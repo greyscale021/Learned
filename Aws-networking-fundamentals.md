@@ -6,6 +6,12 @@ All of cloud networking:
 - *How does traffic move?*
 - *How do we keep it secure?*
 
+## Index
+
+ - [Internet Basics](#part-1-internet-basics)
+ - [AWS networking basics](#part-2---aws-networking)
+ - [How it all fits together](#part-3---how-it-all-fits-together)
+
 ## Part 1: Internet Basics
 
 ### IP Address
@@ -106,9 +112,9 @@ A port is a specific entry point on a server.
 
 ### Routing
 
-Routing is the process of deciding where traffic should go, which path a packet takes to reach its destination.
+Routing is the process of deciding where traffic should go.
 
-> Metaphor: Google Maps for internet traffic where the route table is the map.
+> Metaphor: Maps for internet traffic.
 
 ---
 
@@ -134,7 +140,7 @@ AWS Account
       └── Your resources (EC2, RDS, etc.)
 ```
 
-Inside a VPC you control: IP ranges, subnets, routing, and security rules.
+Inside a VPC we can control: IP ranges, subnets, routing and security rules.
 
 ---
 
@@ -151,16 +157,18 @@ A typical real-world architecture looks like this:
 ```
 Internet
    ↓
-Load Balancer        ← Public Subnet
+Load Balancer        - Public Subnet
    ↓
-Application Server   ← could be public or private
+Application Server   - could be public or private
    ↓
-Database             ← Private Subnet
+Database             - Private Subnet
 ```
 
-Users hit the load balancer. The load balancer talks to the app and the app talks to the database. The database is never directly reached from outside.
+Users hit the load balancer, the load balancer talks to the app and the app talks to the database. The database is not directly reached from outside.
 
 ---
+
+## Gateways
 
 ### IGW (Internet Gateway)
 
@@ -171,13 +179,30 @@ An Internet Gateway is a 1:1 bi-directional (two-way) bridge.
 | Private server → Internet | Yes |
 | Internet → Private server | Yes |
 
-The Internet Gateway is the door between VPC and the internet. Without it, nothing in a VPC can reach the public internet, and nothing outside can reach in.
+The Internet Gateway is the door between VPC and the internet. It connects the two. Without it nothing in a VPC can reach the public internet, and nothing outside can reach in.
 
 ```
-VPC  →  Internet Gateway  →  Internet
+VPC  ←→  Internet Gateway  ←→  Internet
 ```
 
 A public subnet is "public" precisely because its route table points to an Internet Gateway.
+
+---
+
+### NAT Gateway
+
+A NAT Gateway is a oneway valve, for the private server. A private server sometimes needs to reach the internet (e.g., downloading software updates), but you still don't want anyone from the internet to reach that server directly.
+
+NAT Gateway sits in a public subnet and acts as a middleman.
+
+| Direction | Allowed? |
+|-----------|---------|
+| Private server → Internet | Yes |
+| Internet → Private server | No |
+
+The private server's requests go out through the NAT Gateway. Responses come back through it too. But no one outside can initiate a connection in.
+
+> Metaphor: a one-way valve. Traffic can flow out, but nothing gets in uninvited.
 
 ---
 
@@ -191,30 +216,13 @@ Example rule:
 0.0.0.0/0  →  Internet Gateway
 ```
 
-This means: "send all traffic destined for the internet through the IGW." That's what makes a subnet public.
+This means: "send all traffic coming from the internet through the IGW." That's what makes a subnet public.
 
 Private subnets have route tables that don't point to an IGW - so they can't be reached from the internet directly.
 
 ---
 
-### NAT Gateway
-
-One of the trickier concepts, but important.
-
-**The problem:** A private server sometimes needs to reach the internet (e.g., downloading software updates), but you still don't want anyone from the internet to reach that server directly.
-
-**The solution:** NAT Gateway sits in a public subnet and acts as a middleman.
-
-| Direction | Allowed? |
-|-----------|---------|
-| Private server → Internet | Yes |
-| Internet → Private server | No |
-
-The private server's requests go out through the NAT Gateway. Responses come back through it too. But no one outside can initiate a connection in.
-
-> Metaphor: a one-way valve. Traffic can flow out, but nothing gets in uninvited.
-
----
+## Firewalls
 
 ### Security Groups
 
@@ -255,7 +263,8 @@ NACLs don't track connection state. If you allow inbound traffic, you must also 
 |---------|----------------|-------|
 | Applied to | Individual instances | Entire subnets |
 | State | Stateful | Stateless |
-| Default behavior | Deny all inbound | Allow all (default NACL) |
+| Default inbound behavior | Deny all | Allow all |
+| Default outbound behavior | Allow all | Deny all |
 | Primary use | Main firewall | Extra subnet-level filter |
 | Rule evaluation | All rules checked | Rules checked in number order |
 
@@ -274,7 +283,7 @@ With one:
       ↓
  Load Balancer
   ↙    ↓    ↘
- S1   S2   S3   ← traffic spread evenly
+ S1   S2   S3   - traffic spread evenly
 ```
 
 Without one:
@@ -289,59 +298,59 @@ Benefits: **scalability** (handle more traffic), **high availability** (if one s
 
 ## Part 3 - How It All Fits Together
 
-### The Full AWS Security Layer Model
+### The AWS Security Layer Model
 
 Security in AWS is a stack of layers.
 
 ```
 ┌──────────────────────────────────────────┐
 │  Layer 1: Edge                           │
-│  AWS Shield (DDoS protection) & WAF      │
-│  Filters malicious traffic globally      │
+│  - AWS Shield (DDoS protection) & WAF    │
+│  - Filters malicious traffic globally    │
 └─────────────────────┬────────────────────┘
                       ↓
 ┌──────────────────────────────────────────┐
 │  Layer 2: Network Gateway                │
-│  Internet Gateway + Route Tables         │
-│  Controls what can enter/exit the VPC    │
+│  - Internet Gateway + Route Tables       │
+│  - Controls what can enter/exit the VPC  │
 └─────────────────────┬────────────────────┘
                       ↓
 ┌──────────────────────────────────────────┐
 │  Layer 3: Subnet                         │
-│  NACLs                                   │
-│  Filters traffic at the subnet boundary  │
+│  - NACLs                                 │
+│  - Filters traffic at the subnet boundary│
 └─────────────────────┬────────────────────┘
                       ↓
-┌──────────────────────────────────────────┐
-│  Layer 4: Instance                       │
-│  Security Groups                         │
-│  Filters traffic per individual resource │
-└─────────────────────┬────────────────────┘
+┌────────────────────────────────────────────┐
+│  Layer 4: Instance                         │
+│  - Security Groups                         │
+│  - Filters traffic per individual resource │
+└─────────────────────┬──────────────────────┘
                       ↓
 ┌──────────────────────────────────────────┐
 │  Layer 5: OS / Application               │
-│  iptables, app-level auth, encryption    │
-│  Last line of defense on the machine     │
+│  - iptables, app-level auth, encryption  │
+│  - Last line of defense on the machine   │
 └──────────────────────────────────────────┘
 ```
 
 ---
 
-### Typical Architecture - How Everything Connects
+### Typical Architecture - (3 tier)
 
 ```
 Internet
    ↓
 [Internet Gateway]
    ↓
-[Load Balancer]  ← Public Subnet  ← Security Group (allows 80/443)
+[Load Balancer]  - Public Subnet  - Security Group (allows 80/443)
    ↓
-[App Servers]    ← Private Subnet ← Security Group (allows from LB only)
+[App Servers]    - Private Subnet - Security Group (allows from LB only)
    ↓
-[Database]       ← Private Subnet ← Security Group (allows from app only)
+[Database]       - Private Subnet ← Security Group (allows from app only)
 
-      ↑
-[NAT Gateway]   ← Lets private servers reach internet for updates but blocks inbound connections from internet
+   ↑
+[NAT Gateway]   - Lets private servers reach internet for updates but blocks inbound connections from internet
                    
 ```
 
