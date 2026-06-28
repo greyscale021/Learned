@@ -142,7 +142,7 @@ AWS Account
 
 Inside a VPC we can control: IP ranges, subnets, routing and security rules.
 
-In aws a vpc spans across region. The subnets from it, spans across the AZ's. A subnet belongs to exactly one AZ but an AZ can have multiple subnets. So, a vpc spans multiple AZ's in a region.
+A VPC exists within one Region and can span multiple Availability Zones in that Region. The subnets from it, spans across the AZ's. A subnet belongs to exactly one AZ but an AZ can have multiple subnets. So, a vpc spans multiple AZ's in a region.
 
 For EFS file system in aws: (it's just a network file system)
 
@@ -158,7 +158,15 @@ For EFS file system in aws: (it's just a network file system)
 ``` 
 EFS are VPC bound where mount targets are subnet bound.
 
-The meaning: EFS  exists inside a VPC. Where the mount targets(doors) for that EFS , are inside subnets of that VPC. So data never travels between az's it directly goes to EFS.
+```
+Region
+└── VPC
+    ├── Subnet A (AZ-a)
+    ├── Subnet B (AZ-b)
+    └── Subnet C (AZ-c)
+```
+
+The meaning: EFS  exists inside a VPC. Where the mount targets(doors) for that EFS , are inside subnets(of this vpc) in different AZ's. So data never travels between az's, it directly goes to EFS.
 
 
 ---
