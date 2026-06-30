@@ -124,6 +124,35 @@ A firewall decides what traffic is allowed in or out of a network or server.
 
 In AWS, firewalls come in two forms: **Security Groups** and **NACLs**
 
+### Networking Layers (OSI model)
+
+| Layer | Name | Key concepts |
+|-------|------|--------------|
+| **1** | Physical | Cables, Wi-Fi signals |
+| **2** | Data Link | Local network (MAC addresses, switches) |
+| **3** | Network | IP addresses, routing |
+| **4** | Transport | TCP/UDP, ports |
+| **5–6** | Session & Presentation | Session management, encoding |
+| **7** | Application | Actual data contents (HTTP/HTTPS,  URLs, headers, cookies) |
+
+
+#### Layer 3: Network (IP & Routing)
+- "Where" a packet is going
+- Key question: "What's the destination IP?"
+- AWS services: Route Tables, Internet Gateway (IGW), NAT Gateway, VPC, NACLs
+
+#### Layer 4: Transport (TCP/UDP + Ports)
+- "how" data can be delivered reliably
+- TCP = connection-oriented (checks before sending), reliable (e.g., HTTPS on port 443)
+- UDP = connectionless (throws data), faster (e.g., DNS on port 53)
+- AWS services: Security Groups, NLB
+
+#### Layer 7: Application (HTTP/HTTPS + Content)
+- "what" is being sent (the content)
+- Aware of URLs, paths (`/api/users`), headers, cookies, hostnames
+- AWS services: ALB (path/host-based routing), WAF, CloudFront, API Gateway
+
+
 ---
 
 ## Part 2 - AWS Networking
@@ -320,6 +349,8 @@ Without one:
 ```
 
 Benefits: **scalability** (handle more traffic), **high availability** (if one server dies, others keep running), **fault tolerance** (no single point of failure).
+
+
 
 ---
 
