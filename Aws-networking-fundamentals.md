@@ -122,7 +122,7 @@ Routing is the process of deciding where traffic should go.
 
 A firewall decides what traffic is allowed in or out of a network or server.
 
-In AWS, firewalls come in two forms: **Security Groups** and **NACLs**
+> Metaphor: A security guard
 
 ### Networking Layers (OSI model)
 
@@ -139,18 +139,18 @@ In AWS, firewalls come in two forms: **Security Groups** and **NACLs**
 #### Layer 3: Network (IP & Routing)
 - "Where" a packet is going
 - Key question: "What's the destination IP?"
-- AWS services: Route Tables, Internet Gateway (IGW), NAT Gateway, VPC, NACLs
+- AWS services: Route Tables, Internet Gateway (IGW), NAT Gateway, VPC, NACLs, Gateway load balancer (GLB)
 
 #### Layer 4: Transport (TCP/UDP + Ports)
 - "how" data can be delivered reliably
 - TCP = connection-oriented (checks before sending), reliable (e.g., HTTPS on port 443)
 - UDP = connectionless (throws data), faster (e.g., DNS on port 53)
-- AWS services: Security Groups, NLB
+- AWS services: Security Groups, Network load balancer (NLB)
 
 #### Layer 7: Application (HTTP/HTTPS + Content)
 - "what" is being sent (the content)
 - Aware of URLs, paths (`/api/users`), headers, cookies, hostnames
-- AWS services: ALB (path/host-based routing), WAF, CloudFront, API Gateway
+- AWS services: Application load balancer (ALB) (path/host-based routing), WAF, CloudFront, API Gateway
 
 
 ---
@@ -171,7 +171,16 @@ AWS Account
 
 Inside a VPC we can control: IP ranges, subnets, routing and security rules.
 
-A VPC exists within one Region and can span multiple Availability Zones in that Region. The subnets from it, spans across the AZ's. A subnet belongs to exactly one AZ but an AZ can have multiple subnets. So, a vpc spans multiple AZ's in a region.
+
+```
+Region
+└── VPC
+    ├── Subnet A (AZ-a)
+    ├── Subnet B (AZ-b)
+    └── Subnet C (AZ-c)
+```
+
+A VPC exists within one Region and can span across multiple Availability Zones in that Region. The subnets from it, spans across the AZ's. A subnet belongs to exactly one AZ but an AZ can have multiple subnets.
 
 For EFS file system in aws: (it's just a network file system)
 
@@ -187,14 +196,6 @@ For EFS file system in aws: (it's just a network file system)
 ``` 
 EFS are VPC bound where mount targets are subnet bound.
 
-```
-Region
-└── VPC
-    ├── Subnet A (AZ-a)
-    ├── Subnet B (AZ-b)
-    └── Subnet C (AZ-c)
-```
-
 The meaning: EFS  exists inside a VPC. Where the mount targets(doors) for that EFS , are inside subnets(of this vpc) in different AZ's. So data never travels between az's, it directly goes to EFS.
 
 
@@ -208,7 +209,7 @@ This is the most fundamental architectural pattern in AWS.
 
 **Private subnet** - no direct internet connection. Holds anything that should stay internal (databases, backend services).
 
-A typical real-world architecture looks like this:
+A typical real-world architecture:
 
 ```
 Internet
@@ -220,7 +221,7 @@ Application Server   - could be public or private
 Database             - Private Subnet
 ```
 
-Users hit the load balancer, the load balancer talks to the app and the app talks to the database. The database is not directly reached from outside.
+Users hit the load balancer, the load balancer sends traffic to the app and the app talks to the database. The database is not directly reached from outside.
 
 ---
 
@@ -228,26 +229,26 @@ Users hit the load balancer, the load balancer talks to the app and the app talk
 
 ### IGW (Internet Gateway)
 
-An Internet Gateway is a 1:1 bi-directional (two-way) bridge.
+An Internet Gateway is a 1:1 bi-directional bridge.
 
 | Direction | Allowed? |
 |-----------|---------|
 | Private server → Internet | Yes |
 | Internet → Private server | Yes |
 
-The Internet Gateway is the door between VPC and the internet. It connects the two. Without it nothing in a VPC can reach the public internet, and nothing outside can reach in.
+The Internet Gateway is the door between VPC and the internet. Without it a VPC can't reach the public internet, and nothing outside can reach in.
 
 ```
 VPC  ←→  Internet Gateway  ←→  Internet
 ```
 
-A public subnet is "public" precisely because its route table points to an Internet Gateway.
+A public subnet is "public" precisely because its route table points to an IGW.
 
 ---
 
 ### NAT Gateway
 
-A NAT Gateway is a oneway valve, for the private server. A private server sometimes needs to reach the internet (e.g., downloading software updates), but you still don't want anyone from the internet to reach that server directly.
+A NAT Gateway is a oneway valve for a private server. When a private server needs to reach the internet (e.g., downloading software updates) we use nat gateway. It ensures that no one from outside can reach the server, but the server can reach outside.
 
 NAT Gateway sits in a public subnet and acts as a middleman.
 
@@ -256,7 +257,7 @@ NAT Gateway sits in a public subnet and acts as a middleman.
 | Private server → Internet | Yes |
 | Internet → Private server | No |
 
-The private server's requests go out through the NAT Gateway. Responses come back through it too. But no one outside can initiate a connection in.
+The private server's requests go out through the NAT Gateway and esponses come back through it too. But no one outside can initiate a connection in.
 
 > Metaphor: a one-way valve. Traffic can flow out, but nothing gets in uninvited.
 
@@ -264,7 +265,7 @@ The private server's requests go out through the NAT Gateway. Responses come bac
 
 ### Route Tables
 
-A route table is a set of rules that tells traffic where to go, every subnet has one.
+A route table is a set of rules that tells traffic where to go. Every subnet has one.
 
 Example rule:
 
@@ -272,9 +273,9 @@ Example rule:
 0.0.0.0/0  →  Internet Gateway
 ```
 
-This means: "send all traffic coming from the internet through the IGW." That's what makes a subnet public.
+This means: "send all traffic coming from the internet through the IGW." This makes a subnet public.
 
-Private subnets have route tables that don't point to an IGW - so they can't be reached from the internet directly.
+Private subnets have route tables that don't point to an IGW. So, they can't be reached from the internet directly.
 
 ---
 
@@ -332,20 +333,12 @@ For most use cases, Security Groups alone are sufficient. NACLs are an extra lay
 
 A Load Balancer sits in front and distributes incoming traffic across multiple instances.
 
-With one:
-
 ```
 10,000 users
       ↓
  Load Balancer
   ↙    ↓    ↘
  S1   S2   S3   - traffic spread evenly
-```
-
-Without one:
-
-```
-10,000 users  →  1 overloaded server
 ```
 
 Benefits: **scalability** (handle more traffic), **high availability** (if one server dies, others keep running), **fault tolerance** (no single point of failure).
@@ -401,12 +394,11 @@ Internet
    ↓
 [Internet Gateway]
    ↓
-[Load Balancer]  - Public Subnet  - Security Group (allows 80/443)
+[Load Balancer]  - (Public Subnet) (Security Group (allows 80/443))
    ↓
-[App Servers]    - Private Subnet - Security Group (allows from LB only)
+[App Servers]    - (Private Subnet) (Security Group (allows from LB only))
    ↓
-[Database]       - Private Subnet ← Security Group (allows from app only)
-
+[Database]       - (Private Subnet) (Security Group (allows from app only))
    ↑
 [NAT Gateway]   - Lets private servers reach internet for updates but blocks inbound connections from internet
                    
@@ -439,10 +431,10 @@ This is a standard 3-tier architecture.
 | Public Subnet | Has a route to the internet via IGW |
 | Private Subnet | No direct internet access |
 | Internet Gateway | The door between your VPC and the internet |
-| Route Table | Rules that tell traffic where to go |
 | NAT Gateway | Lets private servers reach internet - blocks inbound |
-| Security Group | Instance-level firewall - **stateful** |
-| NACL | Subnet-level firewall - **stateless** |
+| Route Table | Rules that tell traffic where to go |
+| Security Group | Instance-level firewall - stateful |
+| NACL | Subnet-level firewall - stateless |
 | Load Balancer | Distributes traffic across multiple servers |
 
 ### Key Comparisons
