@@ -1,62 +1,51 @@
 # Git
 
-<details>
-  <summary><strong>Learning Path</strong></summary>
+## Index
 
-**Tier 1 - Foundation**
-
-1. [Starting with Local Repository](#1-starting-with-local-repository)
-2. [Tracking Changes in Local Repo](#2-tracking-changes-in-local-repo)
-3. [Branching in Git](#3-branching-in-git)
+1. [Local Repository](#1-local-repository)
+2. [Tracking Changes](#2-tracking-changes)
+3. [Git Branching](#3-branching-in-git)
 4. [Remote Repository](#4-remote-repository)
 5. [.gitignore](#5-gitignore)
-
-**Tier 2 - Daily Use**
-
 6. [Reverting or Resetting Changes](#6-reverting-or-resetting-changes)
 7. [Git Log & History](#7-git-log--history)
 8. [Conventional Commits](#8-conventional-commits)
 9. [Merge Conflicts](#9-merge-conflicts)
 10. [Useful One-Liners & Aliases](#10-useful-one-liners--aliases)
-
-**Tier 3 - Team & Production Workflows**
-
-11. [Advanced Features - Diff, Stash, Rebase](#11-advanced-features--diff-stash-rebase)
+11. [Advanced Features](#11-advanced-features---diff---stash---rebase)
 12. [Tags & Releases](#12-tags--releases)
 13. [Detached HEAD](#13-detached-head)
 14. [Force Push Recovery](#14-force-push-recovery)
 
-</details>
 
 <details>
   <summary><strong>Resources</strong></summary>
 
 1. [GitHub tutorial by freeCodeCamp](https://youtu.be/mAFoROnOfHs?si=tp2vgE0ygFhb9Zp7)
 2. [Official Git Cheatsheet](https://git-scm.com/cheat-sheet)
-3. [Git Cheat Sheet PDF](https://git-scm.com/cheat-sheet.pdf)
 
 </details>
 
 <details>
-  <summary><strong>Things to be clear on before starting</strong></summary>
+  <summary><strong>Notes</strong></summary>
 
-1. This document assumes you've already done a basic Git tutorial.
-2. Most Git commands act on your **current branch** by default.
-3. Key terms:
-    - **HEAD** - Points to the last commit on your current branch. Think of it as "where you are right now."
+1. Key terms:
+    - **HEAD** - Points to the last commit on your current branch.
     - **Working Directory** - What's currently in your file system / editor, including unsaved or unstaged edits.
-    - **Staging Area (Index)** - A middle zone between your editor and a commit. Files go here with `git add` before being committed.
+    - **Staging Area (Index)** - A middle zone between your editor and a commit.
     - **Origin** - The default name for a remote repository.
-    - **Tracked file** - A file Git is aware of (was added or committed at least once). Untracked files are invisible to Git.
+    - **Tracked file** - A file Git is aware of (was added or committed at least once).
     - **Upstream** - The remote branch your local branch is linked to, used by `push` and `pull` by default.
+
+2. Most Git commands act on your **current branch** by default.
 
 </details>
 
 ---
 
-## 1. Starting with Local Repository
+## 1. Local Repository
 
-Set up a local Git repository from scratch, or configure your identity before making commits.
+To set up a local Git repository we need to configure identity before making commits.
 
 - **Set up Git identity** - Git tags every commit with your name and email. Set this once globally.
     ```bash
@@ -76,64 +65,92 @@ Set up a local Git repository from scratch, or configure your identity before ma
 
 ---
 
-## 2. Tracking Changes in Local Repo
+## 2. Tracking changes
 
-Once a repo is initialized, you track changes in a three-step cycle: **edit → stage → commit**.
+Once a repo is initialized, we track changes in a three-step cycle: edit, stage, commit.
 
-- **Stage files** - Move changes into the staging area, ready to be committed.
+- **Stage files** - Move changes into the staging area.
     ```bash
-    git add <file>        # Stage a specific file
-    git add .             # Stage everything in current directory and subdirectories
-    git add --all         # Stage all changes including deletions, anywhere in the repo
+    git add <file>        
+    # stage a specific file
+
+    git add .
+    # stage everything in current directory and subdirectories
+
+    git add --all
+    # stage all changes including deletions, anywhere in the repo
     ```
 
-- **Unstage files** - Remove from staging area without discarding your edits.
+- **Unstage files** - Remove from staging area without discarding edits. (the files needs to be a tracked file)
     ```bash
-    git restore --staged <file>   # Unstage a specific file
-    git restore --staged .        # Unstage everything
+    git restore --staged <file>
+    # unstage a specific file
+
+    git restore --staged . 
+    # unstage everything
     ```
-> Tip - If you hadn't commited yet, it's your first add, to ustage use "git reset &lt;file&gt;"
+> Tip - If you hadn't commited yet, it's your first add, use "git reset &lt;file&gt;"
 
 - **Commit changes** - Save a snapshot of the staged files to history.
     ```bash
-    git commit -m "your message here" -m "Description here"     # Commit with title and description.
-    git commit -am "message"      # stage all and commit in one step. Only stage tracked file, does not stage new/untracked files      
-    git commit      # For using a editor to write  title and desctiption.
+    git commit -m "tittle" -m "description"
+    # commit with title and description.
+
+    git commit -am "message"
+    # stage and commit in one step
+    # only stages tracked file
+
+    git commit
+    # to use a editor to write title and desctiption.
     ```
 
-> **Tip - Write good commit messages.** Use the imperative form: `"Add login route"` not `"Added login route"`. One line for small changes; use a body for complex ones. Good history makes debugging much easier later.
+> **Tip - Write good commit messages.** Use the imperative form: `"Add login route"` not `"Added login route"`. One line for small changes; use a body for complex ones.
 
 - **Untrack files**
     ```bash
-    git rm --cached <file>      # Remove <file> from tracking file list.
+    git rm --cached <file> 
+    # remove <file> from tracking file list.
     ```
 ---
 
 ## 3. Branching in Git
 
-Branches let you work on features, fixes, or experiments in isolation from the main codebase. In real teams, working directly on `main` is almost always off-limits.
+Branches are just different time lines of the same repo. It let's you work on features, or experiments in isolation from the main codebase. In real teams, working directly on `main` is almost always off-limits.
 
 ```bash
-git branch          # List all local branches
-git branch -a       # List local + remote-tracking branches
-git branch <branch-name>      # Create a new branch (doesn't switch to it)
-git switch <branch-name>      # Switch to a branch
-git switch -c <branch-name>   # Create and switch in one step
-git branch -d <branch-name>   # Delete a branch
-git branch -D <branch-name>   # Force delete (even if unmerged)
+git branch
+# list all local branches
+git branch -a
+# list local + remote-tracking branches
+
+git branch <branch-name> 
+# create a new branch
+git switch <branch-name>
+# switch to a branch
+
+git switch -c <branch-name>   
+# create and switch
+
+git branch -d <branch-name>   # delete a branch
+git branch -D <branch-name>   # force delete (even if unmerged)
 ```
 
 - **Remote branch**
     ```bash
-    git switch -c <branch> origin/<branch>    # Create a local <branch> from remote <branch> | A(remote) → A(local)
-    git pull origin <branch>    # Fetches and merges <branch> from remote to current local branch | A(remote) → Current local branch
+    git switch -c <branch> origin/<Branch> 
+    # create a local <branch> from remote <Branch>
+
+    git pull origin <branch>    
+    # pulls <branch> from remote to local
     ```
 
 - **Merge a branch into the current branch:**
     ```bash
-    git merge <branch>             # Merges <branch> into your current branch
-    git merge --no-ff <branch>     # Force a merge commit even if fast-forward is possible. 
-    # Preserves branch history, prefered in teams
+    git merge <branch> 
+    # merges <branch> into your current branch
+    git merge --no-ff <branch>
+    # force a merge commit even if fast-forward is possible. 
+    # fast-forward: add commits in linear, if no new commit is in between.
     ```
 
 > **Typical branch naming conventions in teams:**
@@ -147,12 +164,13 @@ git branch -D <branch-name>   # Force delete (even if unmerged)
 
 ## 4. Remote Repository
 
-Connect your local repo to a hosted remote (GitHub, GitLab, etc.) to back up code, collaborate, or trigger CI/CD pipelines.
+Connect your local repo to a hosted remote service (GitHub, GitLab) to back up things, collaborate, or trigger CI/CD.
 
-- **Connect an existing local repo to a remote:**
+- **Connect local repo to remote:**
     ```bash
     git remote add origin <repo-url>
-    git remote -v                        # Verify the remote was added
+    git remote -v
+    # seec the remote was added
     ```
 
 - **Clone a remote repo to your machine:**
@@ -432,7 +450,7 @@ git config --global --edit  # It will open in default editor
 
 ---
 
-## 11. Advanced Features - Diff, Stash, Rebase
+## 11. Advanced Features - Diff - Stash - Rebase
 
 ### Viewing Diffs
 
