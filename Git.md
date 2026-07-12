@@ -408,13 +408,15 @@ BREAKING CHANGE: /v1 routes have been removed. Migrate to /v2.
 
 ## 9. Merge Conflicts
 
-A merge conflict happens when two branches edit the same part of the same file, and Git can't automatically decide which version to keep. Git pauses the merge and asks you to resolve it manually.
+A merge conflict happens when two branches edit the same part. Git can't automatically decide which version to keep.
 
-### When conflicts happen
-- `git merge <branch>`
-- `git pull` (which is fetch + merge)
-- `git rebase`
-- `git cherry-pick` (Pick a specific commit from a branch to current branch)
+### Scenarios:
+```bash
+- git merge <branch>
+- git pull # pull is fetch + merge
+- git rebase
+- git cherry-pick # pick a specific commit from a branch
+```
 
 ### What a conflict looks like in the file
 ```
@@ -424,142 +426,188 @@ A merge conflict happens when two branches edit the same part of the same file, 
   const port = 8080;
 >>>>>>> feature/update-port
 ```
-- Everything between `<<<<<<< HEAD` and `=======` is **your current branch's version**
-- Everything between `=======` and `>>>>>>>` is **the incoming branch's version**
+- Everything between `<<<<<<< HEAD` and `=======` is current branch's version
+- Everything between `=======` and `>>>>>>>` is incoming branch version
 
-### How to resolve
+### Resolving:
 
-1. Open the conflicted file and decide what the final version should be
+1. Open the conflicted file
 2. Delete the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) and all unwanted code
-3. Stage the resolved file:
+3. Stage and merge the resolved file:
     ```bash
-    git add <file>
-    ```
-4. Complete the merge:
-    ```bash
-    git commit              # Finish a merge
-    ```
+    git add <file> # stage change
+    
+    git commit  # finish the merge
     Or,
-    ```bash
-    git rebase --continue   # If the conflict happened during rebase
+    git rebase --continue   # if conflict during rebase
     ```
 
-### Aborting if you want to back out
+### Aborting:
 ```bash
-git merge --abort       # Cancel an in-progress merge, restore to pre-merge state
-git rebase --abort      # Cancel an in-progress rebase
+git merge --abort
+# cancel the in-progress merge
+# restore to pre-merge state
+
+git rebase --abort
+# cancel an in-progress rebase
 ```
 
-### Useful during conflict resolution
+### Notes for conflict resolution:
 ```bash
-git status              # Shows which files are conflicted
-git diff                # Shows remaining conflicts
-git log --merge         # Shows commits from both branches that caused the conflict
+git status
+# during conflict, shows which files are conflicted
+
+git diff
+# shows remaining conflicts
+
+git log --merge
+# shows commits from both branches that caused the conflict
 ```
-
-> **Tip:** If conflicts happen often in the same files, that usually signals a structural problem - two people or features owning the same code. Worth discussing with the team.
-
 ---
 
 ## 10. Useful One-Liners & Aliases
 
 **Helpful one-liners:**
 ```bash
-git log --oneline --graph --all # Visual overview of all branches
-git diff --stat HEAD            # Summary of changed files in compact view (not line-by-line)
-git shortlog -sn                # Commit count per author
-git stash list                  # View all stashes
-git remote -v                   # Show remote URLs
-git branch --merged             # Branches already merged into current
-git branch --no-merged          # Branches not yet merged
+git log --oneline --graph --all 
+# visual overview of all branches
+
+git diff --stat HEAD
+# summary of changed files in compact view
+# working dir vs head
+
+git branch --merged
+# branches already merged into current
+git branch --no-merged
+# branches not yet merged
 ```
 
-**Set up aliases** (shortcuts for long commands):
+**Set up aliases**: making shortcuts for long commands.
+```bash
+git config --global alias.x <cmd>
+# the git <cmd> would be alias as x 
+# we can use it as git x
+```
+
+Examples:
+
 ```bash
 git config --global alias.st status
-git config --global alias.co switch
 git config --global alias.lg "log --oneline --graph --all"
 ```
-
-After setting aliases:
 ```bash
-git st         # same as git status
-git co main    # same as git switch main
-git lg         # same as git log --oneline --graph --all
+git st
+# git status
+git lg
+# git log --oneline --graph --all
 ```
 
-To see and edit all alias:
+To see and edit all global variable:
 ```bash
-git config --global --edit  # It will open in default editor
+git config --global --edit
 ```
 
 ---
 
 ## 11. Advanced Features - Diff - Stash - Rebase
 
-### Viewing Diffs
+### Diff
 
-At any moment, a file can exist in three states: the last commit (HEAD), the staging area, and your working directory. `git diff` compares any two of these.
+A file can exist in three areas: HEAD, the staging area and working directory. `git diff` compares any two of these.
 
-```bash
-git diff                    # Working directory vs Staging area
-git diff --staged           # Staging area vs HEAD
-git diff HEAD               # Working directory vs HEAD
-git diff left..right        # Any two refs: branches, commits, tags
-git diff HEAD..origin/main  # What the remote has that your local HEAD doesn't
-```
->*Note: Diff by default targets the next stage(working dir vs staging, staging vs Head)*
-
->*Note: diff left..right means, what changes turn the left to right* 
-
-### Stashing Changes
-
-Stash lets you save work-in-progress without committing, so you can switch branch or context cleanly. It only saves **tracked** files (files that have been added or committed at least once).
+git diff compares file like, how to turn this to this with + for additions and - for subtractions.
 
 ```bash
-git stash                 # Save tracked changes, reset working dir + staging to HEAD
-git stash pop             # Re-apply the latest stash and delete it from stash list
-git stash apply           # Re-apply the latest stash but keep it in the list
-git stash list            # See all saved stashes
-git stash drop stash@{n}  # Delete a specific stash entry
+git diff
+# working dir vs staging area
+git diff --staged           
+# staging area vs HEAD
+git diff HEAD
+# working dir vs HEAD
+
+git diff left..right
+# left vs right, how to turn left to right
+# any two refs: branches, commits, tags
+git diff HEAD..origin/main  
+# how to turn HEAD to origin/main
+```
+>*Note: diff by default targets the next stage(working dir vs staging, staging vs Head)*
+
+### Stashing
+
+Stashing saves working dir + staging area and resets everything to HEAD. Only saves tracked files.
+
+```bash
+git stash
+# save working dir + staging (tracked files)
+# resets everything to HEAD
+git stash list
+# see all saved stashes
+
+git stash apply
+# apply the latest stash
+git stash apply stash@{n}
+# apply the nth stash
+
+git stash pop
+# apply and delete latest stash from list
+git stash pop stash@{n}
+# apply and delele nth stash from list
+
+git stash drop stash@{n}  
+# delete a specific stash entry
 ```
 
-> **Note:** Untracked files are not stashed by default. Use `git stash -u` to include them.
+> **Note:** `git stash -u` to include untracked files.
 
 ### Rebasing
 
-Rebase replays your commits on top of another branch, keeping history linear and clean. Preferred over merge in many teams for feature branches.
-
-```bash
-git rebase <branch>       # Replay current branch's commits on top of <branch>
-git rebase -i <branch>    # Interactive rebase: edit, squash, reorder, or drop commits
-git pull --rebase         # Fetch + rebase instead of fetch + merge
+Rebase replays commits on top of another branch. Preferred over merge in many teams.
 ```
-
-**Visual:**
-```
-Before rebase (on feature branch):
+Before:
   main:    A - B - C
   feature: A - B - D - E
 
-After: git rebase main (while on feature):
+After: git rebase main (while on feature branch):
+  
   feature: A - B - C - D - E
 ```
 
-> ⚠️ **Never rebase commits that have already been pushed to a shared branch.** It rewrites history, which breaks everyone else's local copies. Rebase is safe on your own local/feature branches only.
+```bash
+git rebase <branch>
+# replay current branch's commits on top of <branch>'s commits
 
-### Clean Daily Workflow (Professional Pattern)
+git rebase -i < >
+# interactive rebase: edit, squash, reorder, or drop commits
+
+git pull --rebase
+# fetch then rebase instead of merge
+```
+
+> Don't rebase commits that have already been pushed to a shared branch. It rewrites history. Use case, self-local.
+
+### Professional Pattern
 
 ```bash
 git fetch
-git diff HEAD..origin/main     # See what's changed on remote before pulling
-git stash                      # Stash local work if needed
-git pull --rebase              # Pull cleanly without a merge commit
-git stash pop                  # Re-apply local work on top
+git diff HEAD..origin/main     
+# to see what changed on remote
+git stash
+# stash local work
+git pull --rebase
+# pull cleanly without a merge commit
+git stash pop
+# Re-apply local work on top
 ```
 
+### Removing files
+
 ```bash
-git clean -fd                  # Remove all untracked files and directories (irreversible)
+git clean -fd
+# deletes all untracked files
+
+git rm --cached
+# removes file from tracking list
 ```
 
 ---
