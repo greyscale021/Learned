@@ -117,29 +117,37 @@ Once a repo is initialized, we track changes in a three-step cycle: edit, stage,
 
 Branches are just different time lines of the same repo. It let's you work on features, or experiments in isolation from the main codebase. In real teams, working directly on `main` is almost always off-limits.
 
-```bash
-git branch
-# list all local branches
-git branch -a
-# list local + remote-tracking branches
-
-git branch <branch-name> 
-# create a new branch
-git switch <branch-name>
-# switch to a branch
-
-git switch -c <branch-name>   
-# create and switch
-
-git branch -d <branch-name>   # delete a branch
-git branch -D <branch-name>   # force delete (even if unmerged)
-```
-
-- **Remote branch**
+- **List branch**:
     ```bash
+    git branch
+    # list all local branches
+    git branch -a
+    # list local + remote-tracking branches
+    ```
+
+- **Switch to branch**:
+    ```bash
+    git switch <branch-name>
+    # switch to a branch
+    ```
+
+- **Create a branch:**
+    ```bash
+    git branch <branch-name> 
+    # create a new branch
+
+    git switch -c <branch-name>   
+    # create and switch
+
     git switch -c <branch> origin/<Branch> 
     # create a local <branch> from remote <Branch>
 
+    git switch -c <new-branch> <commit-hash>
+    # create a local <branch> from a specific commit
+    ```
+
+- **Remote branch**
+    ```bash
     git pull origin <branch>    
     # pulls <branch> from remote to local
     ```
@@ -153,12 +161,26 @@ git branch -D <branch-name>   # force delete (even if unmerged)
     # fast-forward: add commits in linear, if no new commit is in between.
     ```
 
+- **Deleting branch**:
+    ```bash
+    git branch -d <branch-name>   
+    # delete a branch
+    git branch -D <branch-name>   
+    # force delete (even if unmerged)
+    ```
+
+- **Detached HEAD mode:**
+    ```bash
+    git switch --detach <commit-hash>
+    # explore history without being on a branch
+    ```
+
 > **Typical branch naming conventions in teams:**
-> - `feat: add-login`
-> - `fix: broken-redirect`
-> - `chore: update-dependencies`
-> - `release: v1.2.0`
-> - `refactor: simplify-logic`
+> - `feat/add-login`
+> - `fix/broken-redirect`
+> - `chore/update-dependencies`
+> - `release/v1.2.0`
+> - `refactor/simplify-logic`
 
 ---
 
@@ -170,152 +192,176 @@ Connect your local repo to a hosted remote service (GitHub, GitLab) to back up t
     ```bash
     git remote add origin <repo-url>
     git remote -v
-    # seec the remote was added
+    # see remote status
     ```
 
-- **Clone a remote repo to your machine:**
+- **Clone remote repo to local:**
     ```bash
-    git clone <repo-url>                 # Downloads repo into a new folder
-    git clone <repo-url> <folder-name>   # Clone into a specific folder name
+    git clone <repo-url>
+    # downloads repo into a new folder
+    git clone <repo-url> <folder-name>   
+    # downloads into a specific folder name
     ```
 
-- **Push (upload) your changes:**
+- **Push changes:**
     ```bash
-    git push -u origin <branch>   # Push branch + set upstream (do this once per branch)
-    git push                      # Push to the tracked upstream (after -u is set)
-    git push --all                # Push all local branches to remote
-    git push --force-with-lease   # Force push safely - fails if remote has new commits you haven't seen
-                                  # (safer than --force, use when rebasing a shared branch)
+    git push -u origin <branch>   
+    # push + set upstream as origin (-u)
+    git push
+    # push to set upstream
+
+    git push origin <local-branch-name>
+    # push specific local branch to origin
+    git push --all        
+    # push all local branches to remote
+
+    git push --force-with-lease
+    # force push safely
+    # fails if remote has new commits
+    # safer than --force, use when rebasing a shared branch
     ```
 
-- **Fetch (download without merging):**
+- **Fetch** (update the remote-tracking branches, origin/):
     ```bash
-    git fetch origin              # Update remote-tracking refs (origin/main etc.) without touching local branches
+    git fetch origin
+    # update remote-tracking refs (e.g. origin/main)
     ```
 
-- **Pull (fetch + merge or rebase):**
+- **Pull**(fetch + merge or rebase):
     ```bash
-    git pull                      # Pull from tracked upstream
-    git pull origin <branch>      # Pull specific remote branch into current local branch
-    git pull --rebase             # Pull and rebase instead of merge (keeps history cleaner)
+    git pull
+    # pull from tracked upstream
+    git pull origin <branch>
+    # pull specific remote branch
+    
+    git pull --rebase
+    # pull and rebase instead of merge 
     ```
 
 ---
 
 ## 5. .gitignore
 
-`.gitignore` tells Git which files to never track. This is **critical for security and cleanliness**, especially in cloud and DevOps work.
+`.gitignore` tells Git which files not to track.
 
-Create a `.gitignore` file in your project root:
+Create a file named `.gitignore`. Use * as pointer, x/ for folders and .x for extension.
+
+Example:
 ```
-# Dependencies
 node_modules/
-__pycache__/
-*.pyc
-
-# Environment variables (NEVER commit these)
 .env
-.env.*
-*.env
-
-# Cloud credentials (NEVER commit these)
-.aws/credentials
 *.pem
-*.key
-service-account.json
 
-# Terraform (state files contain sensitive resource info)
-*.tfstate
-*.tfstate.backup
-.terraform/
-*.tfvars         # Often contains secrets
-
-# Build outputs
-dist/
-build/
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db
+# now git will not track, node_modules folder;
+# ".env" file;
+# any file ends with .pem extension
 ```
 
 ```bash
 git rm --cached <file>
-# Stop tracking a file that was already committed 
-# Generaly after adding it to . gitignore
+# stops tracking file that was already committed 
+# use it after adding it to .gitignore
 ```
 ---
 
-## 6. Reverting or Resetting Changes
-`Restore`: resets to HEAD, `Reset`: move HEAD and `Revert`: new commit for commit fallback.
+## 6. Reverting or Resetting
+`Restore`: resets working/staging to staging/HEAD
 
-### restore - undo local edits
+`Reset`: move HEAD pointer
+
+`Revert`: new commit for undoing a commit.
+
+### Restore: Used for undoing local edits
 ```bash
-git restore <file>  # Discard unstaged changes of <file> (resets to HEAD)
-git restore .   # Discard all unstaged changes
-git restore --staged <file> # Unstage a staged file (staging area resets to HEAD)
-git restore --staged --worktree <file>  # Undo both staged and unstaged changes
+git restore <file>
+git restore .
+git restore --worktree <file>
+# discard unstaged changes
+# working dir resets to staging area
+
+git restore --staged <file> 
+# unstage a staged file
+# staging area resets to HEAD
+
+git restore --staged --worktree <file>  
+# undo both staged and unstaged changes
+# staging and working area resets to HEAD
 ```
 
-### reset - move HEAD
+### Reset: Used for moving HEAD
 ```bash
-git reset <file>    # Unstage a file (same as restore --staged)
+git reset <file>
+# unstage a file 
+# resets staging to head (same as restore --staged)
 
-git reset --soft <commit>   # Move HEAD to <commit>, keep staging + working dir as-is
-git reset --mixed <commit>  # Move HEAD to <commit>, clear staging, keep working dir  ← default
-git reset --hard <commit>   # Move HEAD to <commit>, wipe staging + working dir
-git reset --hard    # Nuke all uncommitted changes
+git reset <commit>
+git reset --mixed <commit>
+# move HEAD to <commit>
+# clear staging area, keep working dir
+
+git reset --soft <commit>
+# move HEAD to <commit>
+# keep staging and working dir
+  
+git reset --hard <commit>   
+# move HEAD to <commit>
+# clear staging and working dir
+
+git reset --hard    
+# nuke all uncommitted changes :)
+# resets to HEAD, clear staging and working dir.
 ```
 
-### revert - undo a commit by a new commit
+### Revert: Undo the changes of a commit by a new commit
 ```bash
-git revert <commit>     # Creates a new commit that undoes the changes made in <commit>
+git revert <commit>     
+# Creates a new commit that undoes the changes made in <commit>
 ```
 
-**When to use what:**
+**Usecases:**
 
 | Situation | Command |
 |---|---|
-| Undo unsaved local edits | `git restore` |
+| Undo unsaved local edits | `git restore` or `git restoere --worktree` |
 | Unstage something | `git restore --staged` or `git reset` |
 | Undo a commit that's already on remote | `git revert` |
 
 ---
 
-## 7. Git Log & History
+## 7. Git Log & History:
+
+Logs show, history top to bottom
 
 ```bash
-git log  # Full commit history with author, date, message
-git shortlog    # Show summary of commits grouped by author
+git log  
+# full commit history (author, date, message)
 
-git log --oneline   # Compact view: one commit per line (newest first)
-git log --oneline --graph   # ASCII branch graph - useful for visualizing merges
-git log --oneline --all     # Include all branches and remotes
-git log --author="name"     # Filter commits by author
-git log -- <file>           # Show commits that touched a specific file
+git log --oneline   
+# compact view, one commit per line
+git log --oneline --graph   
+# shows simplified graph of logs, useful for merges
+git log --oneline --all     
+# include all branches including remotes
 
-git show <commit-hash>      # Full details of one specific commit
+git log --author="name"     
+# filter commits by author
+git log -- <file>           
+# filter commit by file affected
+
+git shortlog    
+# show summary of commits grouped by author
+
+git show <commit-hash>
+# full details of one specific commit
 ```
 
-- **Move HEAD to a specific commit (detached HEAD mode):**
-    ```bash
-    git switch --detach <commit-hash>   # Explore history without being on a branch
-    git checkout <commit-hash>          # Old equivalent
-    ```
-
-- **Create a branch from a specific commit:**
-    ```bash
-    git switch -c <new-branch> <commit-hash>
-    ```
-
-> **Tip:** `git log --oneline --graph --all` is one of the most useful commands for understanding your repo's state. Consider aliasing it. [(see section 10)](#10-useful-one-liners--aliases)
+> **Tip:** `git log --oneline --graph --all` is popular for checking repo state. Consider aliasing it. [(see section 10)](#10-useful-one-liners--aliases)
 
 ---
 
 ## 8. Conventional Commits
 
-Conventional Commits is a widely adopted standard for writing commit messages in a structured, machine-readable way. Many CI/CD tools, changelogs, and release pipelines depend on it.
+Conventional Commits are structured way to write commit messages. CI/CD tools, changelogs, and release pipelines use this.
 
 **Format:**
 ```
@@ -340,24 +386,23 @@ Conventional Commits is a widely adopted standard for writing commit messages in
 | `ci` | CI/CD pipeline changes |
 | `perf` | Performance improvement |
 
-**Examples:**
+Examples:
 ```
-feat(auth): add JWT login endpoint
+feat(auth): add login endpoint
 fix(api): handle null response from payment service
 chore: update dependencies to latest versions
 docs: add setup instructions to README
-refactor(db): extract query builder into separate module
 ci: add Docker build step to GitHub Actions
 ```
 
-**Breaking changes** - add `!` after the type or a `BREAKING CHANGE:` footer:
+**Breaking changes**:
+
+ add `!` after the type or a `BREAKING CHANGE:` footer:
 ```
 feat!: remove deprecated /v1 API endpoints
 
 BREAKING CHANGE: /v1 routes have been removed. Migrate to /v2.
 ```
-
-> **Why this matters for cloud/DevOps:** Tools like semantic-release, GitHub Actions triggers, and auto-generated changelogs all parse commit types. A repo with consistent conventional commits is significantly easier to automate deployments around.
 
 ---
 
