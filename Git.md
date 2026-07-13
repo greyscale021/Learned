@@ -614,99 +614,120 @@ git rm --cached
 
 ## 12. Tags & Releases
 
-Tags mark specific commits as significant - usually version releases. CI/CD pipelines often trigger deployments on tag pushes.
+Tags mark specific commits, usually for version releases.
 
 ```bash
-git tag                           # List all tags
-git tag v1.0.0                    # Create a lightweight tag on current commit
-git tag -a v1.0.0 -m "Release"    # Annotated tag (has author, date, message - preferred)
-git push origin v1.0.0            # Push a specific tag to remote
-git push origin --tags            # Push all tags to remote
-git tag -d v1.0.0                   # Delete a local tag
-git push origin --delete <tag-name> # Delete a remote tag
+git tag
+# list all tags
+
+git tag v1.0.0
+# create a tag on current commit
+
+git tag -a v1.0.0 -m "Release"
+# annotate tag
+
+git push origin v1.0.0
+# push a specific tag to remote
+git push origin --tags
+# push all tags to remote
+
+git tag -d v1.0.0
+# delete a local tag
+git push origin --delete <tag-name> 
+# delete a remote tag
 ```
 
 ---
 
 ## 13. Detached HEAD
 
-**Detached HEAD** means your `HEAD` is pointing directly to a commit instead of to a branch. You're not "on" any branch - changes you make here won't belong to anything unless you create a branch from this state.
+A Git detached HEAD state means you are not on any branch. Instead, your HEAD points to an old commit.
 
-### How you get into detached HEAD
+Won't save any commits, until you make new branch from it. Used for old commit exploration or experimentation. 
+
+Entering:
+
 ```bash
-git switch --detach <commit-hash>   # Intentionally explore a past commit
-git checkout <commit-hash>          # Old equivalent
+git switch --detach <commit-hash>
+# detached head state to <commit-hash>
 ```
 
-### What you can do in detached HEAD
-- Look around, run the code, inspect files - completely safe
-- Make experimental commits - they exist but belong to no branch
+While in it:
 
-### How to get back safely
 ```bash
-git switch <branch>    # Go back to <branch> - experimental commits will be garbage collected
+git switch <branch>
+ # go back to <branch> 
+ # experimental commits will be discarded eventually
 ```
-
-### Save your work from detached HEAD
-If you made commits in detached HEAD that you want to keep:
+Or,
 ```bash
-git switch -c <new-branch-name>     # Create a branch from current position - your commits are now saved
+git switch -c <new-branch-name>
+# create a branch from current position 
+# commits will be saved
 ```
-
-> **Rule of thumb:** Detached HEAD is fine for read-only exploration. The moment you want to make changes, create a branch first.
 
 ---
 
 ## 14. Force Push Recovery
 
-Force pushing (`git push --force`) rewrites remote history. If done on a shared branch, it can overwrite other people's commits. Here's how to recover from common force push disasters.
+Force pushing (`git push --force`) can rewrite remote history. Here's how to recover from common force push disasters.
 
-### Prevention first
+### Precautions:
 ```bash
-git push --force-with-lease    # Safer: fails if someone else pushed since your last fetch
-                               # Use this instead of --force whenever possible
+git push --force-with-lease   
+# fails if someone else pushed since last fetch
+# recommended using this instead of --force whenever possible
 ```
 
-### Scenario 1 - You force pushed and want to undo it
+### Scenario 1 -  force pushed and now to undo it
 
 ```bash
-git reflog  # Find the commit remote was on before your force push
-git push origin <commit-hash>:main --force-with-lease  # Restore remote to that commit
+git reflog 
+# shows every movement of HEAD 
+# find commit remote was on before the force push
+
+git push origin <commit-hash>:main --force-with-lease
+# restore remote to that commit
 ```
 
-### Scenario 2 - Someone force pushed and your local branch is now behind
+### Scenario 2 - remote is force pushed and now local branch is behind
 
 ```bash
 git fetch origin
-git log HEAD..origin/main       # See what's on remote that you don't have
-git log origin/main..HEAD       # See what you have that remote doesn't
 
-# Option A: Accept the remote version
+git log HEAD..origin/main
+# commit difference of local and remote HEAD
+git log origin/main..HEAD
+# commit difference of remote and local HEAD
+```
+```bash
+# Accept the remote version
 git reset --hard origin/main
 
-# Option B: Recover your commits and re-apply them
+# Recover your commits and re-apply them
 git rebase origin/main
 ```
 
-### Scenario 3 - You reset --hard and lost commits
-
-`git reflog` is your safety net. Git keeps a local log of every place HEAD has been, even after resets.
+### Scenario 3 - lost commits from reset --hard
 
 ```bash
-git reflog  # Find the commit hash from before the reset
-git switch -c recovery-branch <commit-hash>     # Create a branch at that commit to recover your work
+git reflog 
+# shows every movement of HEAD 
+# find commit remote was on before the force push
+
+git switch -c recovery-branch <commit-hash>
+# create branch at that commit to recover
 ```
 
-> **Reflog is local only** - it doesn't exist on the remote. This is why it can save you after a local `reset --hard`, but not after someone else force pushes and the remote history is gone.
+> Reflog is local only
 
-### Quick reference - what to do when things go wrong
+### Contingency Plans:
 
-| Situation | Fix |
-|---|---|
-| Committed to wrong branch | `git reset --soft HEAD~1` → stash → switch branch → unstash → commit |
-| Committed sensitive file | `git reset --soft HEAD~1` → add to `.gitignore` → recommit |
-| Accidentally deleted a branch | `git reflog` → find last commit → `git switch -c <branch> <hash>` |
-| Force pushed and broke remote | `git reflog` → find old commit → force push it back |
-| Merge gone wrong | `git merge --abort` (if still in progress) or `git reset --hard ORIG_HEAD` |
+| Situation | Fix | Reason |
+|---|---|---|
+| Committed to wrong branch | `git reset --soft HEAD~1` <br> `git stash` <br> `git switch <branch>` <br> `git stash pop` <br> `git commit` | Staging area is local bound not branch bound |
+| Committed sensitive file | `git reset --soft HEAD~1` <br> `git rm --cached <file>` <br> `add to .gitignore` <br> `git commit -m "fix"` | git rm --cached <file> removes the file from Git's tracking system |
+| Accidentally deleted a branch | `git reflog` <br>  `git switch -c <branch> <hash>` | find previous commit, when the branch existed, create branch with that hash |
+| Merge gone wrong | `git merge --abort` <br> or <br> `git reset --hard ORIG_HEAD` | Abort the merge or resets to ORIG_HEAD (acts as an automatic safety backup pointer)|
 
 ---
