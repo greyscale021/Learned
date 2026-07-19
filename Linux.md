@@ -10,7 +10,7 @@
 5. [SSH (Secure Shell)](#5-ssh-secure-shell)
 6. [Package Management & File Transfer ](#6-package-management--file-transfer)
 7. [Shell Redirection & Operators](#7-shell-redirection--control-operators)
-8. [Text Processing — grep, sed, awk](#8-text-processing--grep-sed-awk)
+8. [Text Processing: grep, sed, awk](#8-text-processing--grep-sed-awk)
 9. [Vim Basics](#9-vim-basics)
 10. [Cron Jobs](#10-cron-jobs)
 11. [Zombie Processes](#11-zombie-processes)
@@ -18,14 +18,11 @@
 </details>
 
 <details>
-    <summary><strong>Things to be clear</strong></summary>
+    <summary><strong>Things to be clear about</strong></summary>
 
-1. Unix philosophy is "Do one thing well"
-2. The fundamental structure of a command in linux(unix like os) is:
-`command [flags] [arguments]`
- - Command: The name of the program to be executed (`ls`, `grep`, `cd`)
- - Flags (options): Modifiers that change the behavior of the command, usually preceded by a dash (-) or two dashes (--) for spelled-out options
- - Arguments: The target of the command, such as a file name, directory, or text string
+1. The fundamental structure of commands in linux:<br>
+`cmd [flags] [target]`
+    - flags: options, that are preceded by dash (-) or two dashes (--) for spelled-out
 3. Combining Options: Single-character options can often be combined after a single dash (e.g., ls -la). 
 4. sudo (superuser do) - makes you an admin for shortperiod, giving elevated privileges
 5. Process and Service are different things in linux
