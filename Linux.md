@@ -3,7 +3,7 @@
 <details>
     <summary><strong>Index</strong></summary>
 
-1. [Linux navigation](#1-core-linux-navigation-commands)
+1. [Linux navigation](#1-linux-navigation-commands)
 2. [File management](#2-file-management)
 3. [Permissions & ownership](#3-permissions--ownership)
 4. [Processes & System Control](#4-processes--system-control)
@@ -23,43 +23,16 @@
 1. The fundamental structure of commands in linux:<br>
 `cmd [flags] [target]`
     - flags: options, that are preceded by dash (-) or two dashes (--) for spelled-out
-3. Combining Options: Single-character options can often be combined after a single dash (e.g., ls -la). 
-4. sudo (superuser do) - makes you an admin for shortperiod, giving elevated privileges
+3. Combining Options: Single-character options can be combined after a single dash (e.g., ls -la). 
+4. sudo (superuser do) - makes you an admin for short period
 5. Process and Service are different things in linux
  - Process: A running instance of a program
- - Service: A background program managed by the system (usually by systemd)
+ - Service: A background program managed by the system 
 
 </details>
 
-<details>
-    <summary><strong>Cheatsheet</strong></summary>
-    
-| Category | Key Commands |
-|----------|-------------|
-| Navigation | `pwd`, `ls`, `cd`, `tree`, `find`, `locate`, `stat`, `realpath`, `pushd`, `popd` |
-| Files | `touch`, `cp`, `mv`, `rm`, `mkdir`, `rmdir`, `ln`, `nano` |
-| Viewing | `cat`, `less`, `head`, `tail`, `tail -f`, `grep` |
-| Permissions | `chmod`, `chown`, `ls -l` |
-| Users & Groups | `useradd`, `userdel`, `usermod`, `groupadd`, `gpasswd`, `su`, `passwd` |
-| Ownership Info | `who`, `id`, `w`, `users`, `groups` |
-| Processes | `ps`, `top`, `htop`, `pgrep`, `kill`, `pkill`, `killall`, `nice`, `renice` |
-| Jobs | `jobs`, `bg`, `fg` , `Ctrl+Z` to suspend |
-| System Info | `uname`, `uptime`, `free`, `df`, `du`, `lsblk`, `iostat` |
-| Disk | `df`, `du`, `lsblk`, `mount`, `umount` |
-| Services | `systemctl`, `journalctl` |
-| SSH | `ssh`, `ssh-keygen`, `ssh-copy-id`, `scp`, `rsync` |
-| Packages | `apt`, `snap` |
-| Archiving | `tar`, `gzip`, `gunzip`, `zip`, `unzip` |
-| Networking | `ping`, `curl`, `wget`, `netstat`, `ss`, `traceroute`, `dig`, `ip` |
-| Shell Operators | `\|`, `>`, `>>`, `2>`, `&>`, `&&`, `\|\|`, `;` |
-| Power | `shutdown`, `reboot`, `poweroff`, `halt` |
-| Discovery | `man`, `whatis`, `which`, `whereis`, `type`, `history`, `alias` |
-| Text Processing | `grep`, `sed`, `awk` |
-| Scheduling | `crontab`, `logrotate` |
-| Editor | `vim` |
-</details>
 
-## 1. Core Linux Navigation Commands
+## 1. Linux Navigation Commands
 
 These are the fundamental navigation commands in Linux.
 
@@ -67,175 +40,228 @@ These are the fundamental navigation commands in Linux.
 ###  `pwd` (Print Working Directory)
 
 ```bash
-pwd # Shows your current location in the filesystem.
+pwd 
+# prints current directory
 ```
 
 
 ### `ls` (List)
 
 ```bash
-ls      # Lists files in the current directory.
-ls <folder> # Lists file in the <folder>
-ls -l   # Long format (permissions, owner, size, date)
-ls -a   # Show hidden files (files starting with ".")
-ls -h   # Human-readable file sizes
-ls -R   # Recursive (shows subdirectories)
-ls -la  # Show long formatted hidden files
-ls -lah # long format, hidden, human readable
+ls      # lists files in the current directory
+ls folder # lists file in the folder
+
+# With flags-
+ls -l   # lists in long format(permissions, owner, size, date)
+ls -a   # lists hidden (files starting with .)
+ls -h   # lists in human readable
+ls -R   # lists in recursive (shows subdirectories of folders)
+
+# Merging flags-
+ls -la  # lists long foramted hidden files
+ls -lah # long format + hidden + human readable
 ```
 
 
 ### `cd` (Change directory)
 
 ```bash
-cd <foldername> # Change directory to <foldername>
-cd ..      # Go up/back one level
-cd ~       # Go to home directory (default cd)
+cd folder # change directory to folder
+
+cd ..      # go up/back one level
+cd ~       # go to home directory (default cd)
 cd /       # Go to root directory
-cd -       # Go to previous directory
+cd -       # Go to last/previous directory
 ```
 
-We can define paths as two types:
+Paths are two types:
 
 ```bash
 cd /home/user/Documents # Absolute Path (full path from root)
 cd Documents            # Relative Path (from current directory)
 ```
 
-### `tree` (if installed)
+### `tree` (installation needed)
 
 ```bash
-tree # Displays directory structure visually.
+tree # displays directory structure visually
 ```
 
 
-### `find`
+### `find` (search for files)
 
 ```bash
-find . -name "file.txt" # Search for files.
-# Structure: find [starting-point] [expression]
-# Starting-point: . current working directory, / root, ~ home.
+find . -name "file.txt" 
+# find file.txt in current directory 
+
+# structure: find [starting-point] [expression]
+
+# starting-point: current directory ".", root "/", home "~"
 ```
 
 ### `locate`
 
 ```bash
-locate filename # Fast file search (uses an indexed database).
-sudo updatedb # to update the database for 'locate'
+# locate is fast file search (uses an indexed db)
+# need to update the database for 'locate'
+
+sudo updatedb   # to update the db
+locate file     # to use locate, finds file
 ```
 
 ### `stat` (Status)
 
 ```bash
-stat filename # Shows detailed file information(size, permissions, ownership, access)
+stat file
+# shows detailed file information about file
+# size, permissions, ownership, access
 ```
 
 
 ### `realpath`
 
 ```bash
-realpath file.txt # Shows the full absolute path of a file.
+realpath file.txt # Shows the absolute path of a file.
 ```
 
 
 ### `clear`
 
 ```bash
-clear # Clears the terminal screen. Shortcut- (Ctrl + L)
+clear # clears the terminal screen
+# (Ctrl + L) shortcut moves the texts up
 ```
-### `pushd` (push directory) | `popd` (pop directory)
+### `pushd`/`popd` (push/pop directory)
 ```bash
-pushd <direcotry> # Moves to <direcotry> and saves previous directory onto a stack
-popd # Pops the top directory from the stack and moves you there (LIFO)
-dirs # Displays the current directory stack
+pushd directory 
+# saves current directory in stack and moves to directory
+
+popd 
+# pops(apply and delete) the top directory from the stack (LIFO)
+
+dirs 
+# displays the current stack
 ```
 
 ---
-## Command related tools :)
+## Advance navigation
 
 ### `history` (command history)
 ```bash
-history     # History of previous commands.
-history <number>    # Show last <number> commands from recent
-!<number>   # Run the <number> numbered command from history
-!!      # Executes the last command
-!<command>  # Executes the most recent command starting with <command>
-history -c  # Clears the cmd history
+history     
+# lists history of commands
+history -c  
+# clears the cmd history
+
+history number    
+# lists last number commands
+
+!number  
+# run number numbered command from history
+!!      
+# runs last command
+!cmd  
+# runs most recent command starting with cmd
+
 ```
 
 ### `whatis`
 ```bash
-whatis <command> # Shows what does this command do in one sentence
+whatis cmd 
+# cmd explanation in one sentence
 ```
 
 ### `type`
 ```bash
-type <command> # Shows what kind of command is this
+type cmd 
+# prints cmd classification
 ```
 
 ### `which`
 ```bash
-which <command> # Shows the exact executable that will run when you type a command
+which cmd
+# lists the exact executable that will run for cmd
 ```
 
 ### `whereis`
 ```bash
-whereis <command> # Shows all known locations of a command
+whereis cmd 
+# lists all known locations of a cmd
 ```
 
 ### `man` (Manual)
 ```bash
-man <command> # opens the official manual for <command>
+man cmd 
+# opens the official manual for cmd
 ```
 ### `alias`
 ```bash
-alias <new_name>='<command>'    # Makes a alias of <command> as <new_name>
-unalias <name>      # Removes the alias
-alias       # List of alias
+alias new_name='cmd'
+# makes a alias of cmd as new_name
+
+alias
+# lists all alias
+
+unalias name      
+# removes the alias
 ```
 ---
-### Important Directories
+### Important Directories ~~
 
-- `/home` → User directories  
-- `/etc`  → System configuration files  
-- `/var/log` → System logs  
-- `/bin`  → Core command binaries  
-- `/usr`  → Installed applications and libraries
-- `/root` → Root user’s home
-- `/tmp`  → Temporary files
-- `/dev`  → Devices
-- `/proc` → Running process info (virtual filesystem)
-- `/opt`  → Optional software
-- `/lib` → Essential shared libraries
+- `/home` - user directories  
+- `/etc`  - system configuration files  
+- `/var/log` - system logs  
+- `/bin`  - command binaries  
+- `/usr`  - installed applications and libraries
+- `/root` - root user’s home
+- `/tmp`  - temporary files
+- `/dev`  - devices
+- `/proc` - running process info (virtual filesystem)
+- `/opt`  - optional software
+- `/lib`  - essential shared libraries
 
-### Reading logs in /var/log
+### Reading logs
 ```bash
-tail -f /var/log/syslog        # watch live system logs
-cat /var/log/syslog | grep ssh # filter logs for specific service
-ls /var/log                    # see what log files exist
-find /var/log -name "*.log"    # find all log files
+ls /var/log
+# see what log files exist
+find /var/log -name "*.log"
+# find all log files
+
+tail -f /var/log/syslog        
+# live system logs
+
+cat /var/log/syslog | grep ssh 
+# print logs with filer for specific service, here ssh
 ```
 ---
 
 ## 2. File Management
 
-These commands allow you to create, modify, copy, move, delete or view files and directories.
-
 ---
-## Create/delete-
+## Create/Delete-
 ### `touch` (Create File)
 ```bash
-touch <file> # Creates an empty file (if exists it will update the files timestamp)
+touch filename
+# if filename is new, creates an empty file
+# if already exists it will update timestamp of filename
 
-touch -c <file.txt> # Change only the timestamp
-touch -a <file.txt> # Change only the access time
-touch -m <file.txt> # Change only the modification time
+touch -c filename 
+# changes just the timestamp
+touch -a filename
+# changes just the access time
+touch -m filename 
+# changes just the modification time
 ```
 ### `mkdir` (Make directory)
 ```bash
-mkdir <foldername>  # Creates a directory
-mkdir <dir1> <dir2> # Creates multiple directories
-mkdir -p a/b/c  # Creates nested directories | -p stands for parent
+mkdir foldername  
+# creates foldername directory
+mkdir folder1 folder2 
+# creates multiple directories
+
+mkdir -p a/b/c  
+# creates nested directories
+# -p (parent)
 ```
 ### `rmdir` (Remove directory)
 ```bash
