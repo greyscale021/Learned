@@ -21,7 +21,8 @@
     <summary><strong>Things to be clear about</strong></summary>
 
 1. The fundamental structure of commands in linux:<br>
-`cmd [flags] [target]`
+    - `cmd -[flags] [source] [destination]`
+    - or, `cmd -[flags] [target] [destination]`
     - flags: options, that are preceded by dash (-) or two dashes (--) for spelled-out
 3. Combining Options: Single-character options can be combined after a single dash (e.g., ls -la). 
 4. sudo (superuser do) - makes you an admin for short period
@@ -49,7 +50,7 @@ pwd
 
 ```bash
 ls      # lists files in the current directory
-ls folder # lists file in the folder
+ls <folder> # lists file in the <folder>
 
 # With flags-
 ls -l   # lists in long format(permissions, owner, size, date)
@@ -66,7 +67,7 @@ ls -lah # long format + hidden + human readable
 ### `cd` (Change directory)
 
 ```bash
-cd folder # change directory to folder
+cd <folder> # change directory to <folder>
 
 cd ..      # go up/back one level
 cd ~       # go to home directory (default cd)
@@ -77,8 +78,11 @@ cd -       # Go to last/previous directory
 Paths are two types:
 
 ```bash
-cd /home/user/Documents # Absolute Path (full path from root)
-cd Documents            # Relative Path (from current directory)
+# Absolute Path (full path from root)
+cd /home/user/Documents
+
+# Relative Path (from current directory)
+cd Documents
 ```
 
 ### `tree` (installation needed)
@@ -91,8 +95,8 @@ tree # displays directory structure visually
 ### `find` (search for files)
 
 ```bash
-find . -name "file.txt" 
-# find file.txt in current directory 
+find . -name "<file>" 
+# find <file> in current directory 
 
 # structure: find [starting-point] [expression]
 
@@ -106,14 +110,14 @@ find . -name "file.txt"
 # need to update the database for 'locate'
 
 sudo updatedb   # to update the db
-locate file     # to use locate, finds file
+locate <file>     # to use locate, finds <file>
 ```
 
 ### `stat` (Status)
 
 ```bash
-stat file
-# shows detailed file information about file
+stat <file>
+# shows detailed file information about <file>
 # size, permissions, ownership, access
 ```
 
@@ -121,26 +125,28 @@ stat file
 ### `realpath`
 
 ```bash
-realpath file.txt # Shows the absolute path of a file.
+realpath <file> 
+# shows the absolute path of <file>
 ```
 
 
 ### `clear`
 
 ```bash
-clear # clears the terminal screen
-# (Ctrl + L) shortcut moves the texts up
+clear 
+# clears the terminal screen
+# (ctrl + L) shortcut; moves the texts up
 ```
 ### `pushd`/`popd` (push/pop directory)
 ```bash
-pushd directory 
-# saves current directory in stack and moves to directory
+pushd <directory> 
+# saves current directory in stack and moves to <directory>
 
 popd 
 # pops(apply and delete) the top directory from the stack (LIFO)
 
 dirs 
-# displays the current stack
+# displays the current directory stack
 ```
 
 ---
@@ -150,70 +156,71 @@ dirs
 ```bash
 history     
 # lists history of commands
-history -c  
-# clears the cmd history
 
-history number    
-# lists last number commands
+history <number>    
+# lists last <number> commands
 
-!number  
-# run number numbered command from history
+!<number>  
+# run <number> numbered command from history
 !!      
 # runs last command
-!cmd  
-# runs most recent command starting with cmd
+!<command>  
+# runs most recent command starting with <command>
 
+history -c  
+# clears the cmd history
 ```
 
 ### `whatis`
 ```bash
-whatis cmd 
-# cmd explanation in one sentence
+whatis <command> 
+# explanation of <command> in one sentence
 ```
 
 ### `type`
 ```bash
-type cmd 
-# prints cmd classification
+type <command> 
+# prints <command> classification
 ```
 
 ### `which`
 ```bash
-which cmd
-# lists the exact executable that will run for cmd
+which <command>
+# lists the exact executable that will run for <command>
 ```
 
 ### `whereis`
 ```bash
-whereis cmd 
-# lists all known locations of a cmd
+whereis <command> 
+# lists all known locations of a <command>
 ```
 
 ### `man` (Manual)
 ```bash
-man cmd 
-# opens the official manual for cmd
+man <command> 
+# opens the official manual for <command>
 ```
 ### `alias`
 ```bash
-alias new_name='cmd'
-# makes a alias of cmd as new_name
+alias <new_name>='<command>'
+# makes an alias of <command> as <new_name>
 
 alias
 # lists all alias
 
-unalias name      
-# removes the alias
+unalias <name>
+# removes the alias of <name>
 ```
 ---
 ### Important Directories ~~
 
-- `/home` - user directories  
+- `/home` - user directories
+- `/root` - root user’s home 
 - `/etc`  - system configuration files  
 - `/var/log` - system logs  
 - `/bin`  - command binaries  
 - `/usr`  - installed applications and libraries
-- `/root` - root user’s home
+
 - `/tmp`  - temporary files
 - `/dev`  - devices
 - `/proc` - running process info (virtual filesystem)
@@ -223,9 +230,9 @@ unalias name
 ### Reading logs
 ```bash
 ls /var/log
-# see what log files exist
+# prints what log files exist
 find /var/log -name "*.log"
-# find all log files
+# find all files with .log, in /var/log
 
 tail -f /var/log/syslog        
 # live system logs
@@ -237,25 +244,25 @@ cat /var/log/syslog | grep ssh
 
 ## 2. File Management
 
----
-## Create/Delete-
+
+### Create/Delete-
 ### `touch` (Create File)
 ```bash
-touch filename
-# if filename is new, creates an empty file
-# if already exists it will update timestamp of filename
+touch <file>
+# if <file> is new, creates an empty file
+# if already exists it will update timestamp of <file>
 
-touch -c filename 
+touch -c <file> 
 # changes just the timestamp
-touch -a filename
+touch -a <file>
 # changes just the access time
-touch -m filename 
+touch -m <file> 
 # changes just the modification time
 ```
 ### `mkdir` (Make directory)
 ```bash
-mkdir foldername  
-# creates foldername directory
+mkdir <folder>  
+# creates <folder> directory
 mkdir folder1 folder2 
 # creates multiple directories
 
@@ -265,41 +272,77 @@ mkdir -p a/b/c
 ```
 ### `rmdir` (Remove directory)
 ```bash
-rmdir <foldername>  # Removes a directory (if empty)
+rmdir <folder>  
+# removes <folder> (if empty)
 ```
 ### `rm` (Remove)
 ```bash
-rm <file>           # Deletes a file
-rm -R foldername    # Deletes a directory recursively (with everything in it)
-rm -f filename.txt  # Force delete
-rm -rf foldername   # Force delete directory recursively
+rm <file>          
+# deletes <file>
+
+rm -r <folder>    
+# deletes <folder> recursively
+# for using rm on folder
+
+rm -f <file>  
+# force delete <file>
+rm -rf <folder>   
+# forced recursively removes folder
 ```
-## Copy/cut-
+---
+### Copy/cut-
 ### `cp` (Copy)
 ```bash
-cp <source> <destination>  # Copy from source to destination
-cp -R folder1 folder2   # Copy directory recursively
-```
-### `mv` (Move / Rename)
-```bash
-mv <source> <destination>  # Move from source to destination
-mv file.txt newname.txt # It can be used as renaming tool
-```
+cp <source> <destination>
+# copy from <source> to <destination>
 
-## Archive-
-### `zip`
-```bash
-zip <name.zip> <file>           # Zip <file> as <name.zip>
-zip -r <name.zip> <directory>   # Zip <directory> as <name.zip>
-```
-### `unzip`
-```bash
-unzip archive.zip               # Extract zip archive
-unzip -l archive.zip            # List contents without extracting
-unzip archive.zip -d /path/     # Extract to a specific directory
-```
+cp -r folder1 folder2
+# copy directory recursively(for folders)
 
-## View-
+# if folder2 is new:
+# will copy the folder1 and create folder2 with it
+
+# if already existed:
+# will create folder2/folder1
+
+```
+### `mv` (Move / Cut)
+```bash
+mv <source> <destination>  
+# move from source to destination path
+
+mv file.txt newname.txt 
+# also can be used as renaming tool
+```
+```bash
+mv demo.txt "$(cd .. && pwd)"/demo.txt
+# moves demo.txt file one level back
+```
+---
+### Archive-
+### `zip`(Package and compress files)
+```bash
+zip file.zip file1 file2
+# zip file1, file2 as file.zip
+
+# it isn't reverse than normal linux commands
+# zip just see .zip as target or source
+
+zip -r <name.zip> <directory>
+# zip <directory> as <name.zip>
+```
+### `unzip`(Extract)
+```bash
+unzip archive.zip
+# extract archive.zip
+unzip archive.zip -d /path/
+# extract to a specific directory
+
+unzip -l archive.zip
+# list contents without extracting
+```
+---
+### View-
 ### `cat` (Display / Concatenate)
 ```bash
 cat <file>  # Display content
