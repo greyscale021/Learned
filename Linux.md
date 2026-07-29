@@ -413,8 +413,9 @@ Permissions:
 - `w` (write: modify the file)
 - `x` (execute: run the file as a program)
 - `-` (null)
---- 
+---
 ### Permission Control-
+---
 ### Viewing permissions:
 ### `ls -l` (list in long format)
 ```bash
@@ -448,7 +449,7 @@ ls -l file.txt
 # user: user, group: group
 # size: 1234 and date jan 1, file name: file.txt
 ```
-
+---
 ### Changing permissions:
 ### `chmod` (Change mode)
 Controls file/directory permissions. 
@@ -462,8 +463,9 @@ chmod <permissions> <file>
 # chmod 754 file.txt
 # user: rwx, group: r-x, others: r--)
 
-chmod -r <permissions> <dir>
+chmod -R <permissions> <dir>
 # chmod of folder
+# has to be capital r, because -r, acts as remove read
 ```
 Symbolic mode:
 ```bash
@@ -483,6 +485,7 @@ chmod [who][operators][permissions] <file>
 ```
 ---
 ### Ownership control-
+---
 ### Viewing ownership:
 ### `who`, `read` and `id`
 ```bash
@@ -490,14 +493,12 @@ users
 # displays logged in users name
 
 who
-# detailed version of read
+# detailed version of users
 # displays logged in users name+login_time
 
 w
 # detailed version of who
 # displays logged in users name+login_time+activity
-
-getent passwd  # To see all users
 ```
 ### `id` (compact who)
 ```bash
@@ -505,73 +506,132 @@ id
 # display permissions and groups of all users
 id <user>
 # display permissions and groups of <user>
+
+getent passwd
+# display account configurations of all users
+# shell, home dir, UID/GID
 ```
 ### `groups`
 ```bash
-groups  # All groups
-cat /etc/group  # To see all group details
-```
+groups  
+# displays all groups related to user
 
-### `Change`-
+getent group
+# displays all system groups
+
+cat /etc/group  
+# to see all group details
+```
+---
+### Changing ownership:
 ### `chown` (change owner)
 ```bash
-chown <owner>:<group> <file> # Change the owner and group of the file to <owner> and <group>
-chown <owner> <file>    # Just change the <owner> of <file>
-chown -R <owner>:<group> <directory> # Recursively change the owner and group of the directory to <owner> and <group>
+chown <user>:<group> <file> 
+# change user and group of <file> to <user> and <group>
+
+chown -R <user>:<group> <directory> 
+# chown for folder
+
+chown <user> <file>
+# we can just change the user
+
+chown :<group> <file>
+# or just the group of the file
 ```
+---
 
-
-## Managing users and groups
-### `useradd` (Add user)
+### Managing users and groups
+### `useradd` (adds user)
 ```bash
-useradd <username>  # Creates a user
-useradd -m <username>  # Creates a user and a user directory
-adduser     # Automatically adds default flags to useradd
+useradd <name>  
+# creates <name> user
+useradd -m <name>
+# creates <name> user with user directory
 
-sudo userdel <username> # Deletes a user
-sudo userdel -r <username>  # Deletes a user and their files
+userdel <name> 
+# deletes <name> user
+userdel -r <name>
+# deletes <name> user with user directory
+
+adduser <name>
+# adds all necessary flags to useradd
 ```
-### `su` (Switch user)
+### `groupadd` (adds group)
 ```bash
-su <username>  # Switch to <username> (keeps current env)
-su - <username> # Switch to <username> (Loads their full environment)
-su -c <cmd> <user> # Run a single command as another user
-sudo -i -u <username>  # Switch to another user (without needing their password if you're root or have sudo permissions)
+groupadd <groupname>
+# create <groupname> group
+groupdel <groupname>
+# deletes <groupname> group
 ```
 
 ### `passwd` (Password)
 ```bash
-passwd      # Set the password for the current user
-passwd <username>       # Set the password for the <username>
-passwd -S [username]    # displays if an account is locked or active (P- password set, L- locked, NP- no password)
-passwd -l [username]    # disables a password
-passwd -u [username]    # re-enables a password
-passwd -d [username]    # removes the password
+passwd
+# set password for current user
+passwd <username>
+# set password for <username>
+sudo passwd <username>
+# to force change, bypass the minimu requiremnt
+
+passwd -S <username>
+# -S(status): displays password status
+# P- password set, L- locked, NP- no password
+
+passwd -l <username>
+# -l(lock): change status to locked
+passwd -u <username>
+# -u(unlock): change status to password set
+passwd -d <username>
+# -d(del): change status to no password
 ```
 
-### `groupadd` (Add group)
+### `su` (Switch user)
 ```bash
-groupadd <groupname>  # Create a group
-groupdel <groupname>  # Deletes a group
+su <username>
+# switch to <username>, keeps current env
+su - <username>
+# switch to <username>, changes env
+
+su -c <cmd> <user> 
+# run single command as <user>
+sudo -i -u <username>
+# switch to another user without password, with sudo
 ```
+
 ### `usermod` (Modify user)
 ```bash
-usermod -aG <group> <user>   # add user to group (-a = append)
-gpasswd -d <user> <group>    # Removes <user> from <group>
+usermod -g <group> <user>
+# -g(primary group)
+# change group of <user> to <group>
 
-usermod -L <user>            # lock account
-usermod -U <user>            # unlock account
-usermod -d /new/home <user>  # change home directory
+usermod -aG <group> <user>
+# -a(append),-G(secondary group)
+# add <user> to <group>
+
+gpasswd -d <user> <group>
+# removes <user> from <group>
+
+usermod -L <user>
+# lock <user>
+usermod -U <user>
+# unlock <user>
+usermod -d /new/home <user>
+# change home directory
 ```
-
+---
 ## 4. Processes & System Control
-## Process Control-
+### Process Control-
 ### `Monitoring`:
-### `top`
+### `top` (task manager)
 ```bash
-top     # Opens a real-time system monitoring tool (like task-manager)
-# q - quit, k - kill process by pid, shift + (p - sort by cpu, m - sort by memory, v - parent tree view)
-htop    # Enhanced version of top (required installation)
+top
+# opens monitoring tool
+# q-quit
+# k-kill process by pid(porcess id)
+# shift + (p - sort by cpu, m - sort by memory, v - parent tree view)
+
+htop
+# enhanced version of top, requires installation
 ```
 ### `ps` (Processes)
 ```bash
