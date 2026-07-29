@@ -252,6 +252,9 @@ touch <file>
 # if <file> is new, creates an empty file
 # if already exists it will update timestamp of <file>
 
+touch file_{a..c}.txt
+# will create a.txt,b.txt and c.txt
+
 touch -c <file> 
 # changes just the timestamp
 touch -a <file>
@@ -300,11 +303,10 @@ cp -r folder1 folder2
 # copy directory recursively(for folders)
 
 # if folder2 is new:
-# will copy the folder1 and create folder2 with it
+# will copy folder1 contents and create folder2 with it
 
 # if already existed:
-# will create folder2/folder1
-
+# will create folder2/folder1 directory
 ```
 ### `mv` (Move / Cut)
 ```bash
@@ -335,7 +337,7 @@ zip -r <name.zip> <directory>
 ```bash
 unzip archive.zip
 # extract archive.zip
-unzip archive.zip -d /path/
+unzip archive.zip -d /path
 # extract to a specific directory
 
 unzip -l archive.zip
@@ -345,104 +347,164 @@ unzip -l archive.zip
 ### View-
 ### `cat` (Display / Concatenate)
 ```bash
-cat <file>  # Display content
-cat <file> <another-file>    # Concatenate two files as stdout
+cat <file>  
+# display contents of <file>
+cat <file1> <file2>    
+# concatenate two files as stdout
+# display contents of <file1> + <file2>
 ```
-### `less` (View large files)
+### `less` (Display in pages)
 ```bash
-less <file> # View content of file with pagination(in pages)
-# q: quit
-# j/k: scroll down/up
+less <file> 
+# display content of file with pagination
+
+# q: quit | j/k: scroll down/up
 # space: next page
-# /word: search
-# n: next match
+# /: search | n: next match
 ```
 ### `head`
 ```bash
-head <file> # View the first few lines of a file
+head <file> 
+# display the first few lines of <file>
 ```
 ### `tail`
 ```bash
-tail <file> # View the last few lines of a file
-tail -f <file>  # Follow file updates in real-time (for logs)
-# -f (follow), it shows the realtime appended data in the last part of the file
+tail <file> 
+# display the last few lines of <file>
+tail -f <file>  
+# -f (follow), tails in realtime
+# used for logs like "tail -f /var/log/syslog"
 ```
-### `grep` (Search for Text in Files)
+### `grep` (filter)
 ```bash
-grep "search_term" <file>  # Searches for search_term within the <file>
-grep -R "search_term" <directory>  # Searches for something within directory
+grep "<name>" <file>
+# displays content with filter <name> of <file>
+grep -r "<name>" <directory>  # grep of folders
+
+# usecase:
+# grep "error" server.log
+# grabs all error logs
 ```
 ### `ln` (Link)
 ```bash
-ln <file1> <file2> # Creates a hard link between file1 and file2 (both shares the same data and memory)
+ln <file1> <file2> 
+# creates a hard link of file1 as file2 
+# hard link: both shares the same data and memory
 ```
-### `nano` (Simple text editor)
+### `nano` (a text editor)
 ```bash
-nano <file.txt> # Opens file in nano editor(Ctrl+O: Save, Ctrl+X: Exit)
+nano <file.txt> 
+# opens file in nano editor
+# ctrl + o + enter: save
+# ctrl + x: exit
 ```
 ---
 ## 3. Permissions & Ownership
 
-In Linux, permissions control who(users) can read, write, and execute files. Each file has a set of permissions for the:
+Permissions control read, write, and execute access of files.
 
-- User (u)(owner): The person who owns the file
-- Group (g): Group of users that are associated with the file
-- Others (o): All other users
+Who:
+- user (u): the person who owns the file
+- group (g): group of users that are associated with the file
+- others (o): all other users
 
-Each permission is represented by a letter:
+Permissions:
 - `r` (read: view contents of the file)
 - `w` (write: modify the file)
 - `x` (execute: run the file as a program)
-- `-` (permission not granted)
-## Permission Control-
-### `View`-
-### `ls -l` (long formatted list)
+- `-` (null)
+--- 
+### Permission Control-
+### Viewing permissions:
+### `ls -l` (list in long format)
 ```bash
-ls -l <file> 
-# Example output: -rwxr-xr-- 1 user group 1234 Jan 1 file.txt
-# first column: file type (regular-file: -, directory: d, link: l) 
-# permissions split into three groups (per three characters r,w,x): owner(rwx) | group(r-x) | others(r--)
-# second : number of hard link
-# third : owner
-# fourth : group
+ls -l <file>
+# will list extra details of <file>
+# demo: -rwxr-xr-- 2 pokemon pokeball 1024 Feb 29 file.txt
+```
+``` 
+# first column: file type and permissions
+
+# file_type: regular_file(-), directory(d), link:(l)
+# permissions: displayed in 3 sections of per 3 characters
+# sections: 1st(owner), 2nd(group) and 3rd(others)
+
+# second : number of hard links
+# third : user name
+# fourth : group name
 # fifth : file size
 # sixth : date and time
 # last : file name
 ```
+Example:
+```bash
+```bash
+ls -l file.txt
+# output: -rwxr-xr-- 1 user group 1234 Jan 1 file.txt
 
-### `Change`-
-### `chmod` (Change mode) -  Controls File/Directory Permissions
-Numeric mode
+# file type: - (regular file)
+# permissions:owner(rwx), group(r-x), others(r--)
+# hard links:1
+# user: user, group: group
+# size: 1234 and date jan 1, file name: file.txt
+```
+
+### Changing permissions:
+### `chmod` (Change mode)
+Controls file/directory permissions. 
+
+Numeric mode:
 ```bash
 chmod <permissions> <file>
-chmod -R <permissions> <dir>
-# r:4, w:2, x:1 
+# here values, r:4, w:2, x:1 
 # rwx = 7, rw- = 6, r-x = 5, r-- = 4, --- = 0
-# chmod 755 file.txt  (User- rwx, group- rx, others- rx)
-```
-Symbolic mode
-```bash
-chmod [who][operator][permissions] <file>
-# who: u (user/owner), g (group), o (others), a(all)
-# operator: + (add), - (remove), = (set exactly)
-# chmod u+x, g=r file.txt :add execute permission to user, set read only permission to group
-# chmod +x script.sh   (Add execute permission to all)
-# chmod u+x,g+x,o+x script.sh (Previous command was equivalent to this)
-```
 
-## Ownership control-
-### `View`-
-### `who`
-```bash
-who     # Displays usernames, terminal lines, and login times
-id      # User and group
-w       # Shows logged-in users along with their current activity and idle time
+# chmod 754 file.txt
+# user: rwx, group: r-x, others: r--)
+
+chmod -r <permissions> <dir>
+# chmod of folder
 ```
-### `users`
+Symbolic mode:
 ```bash
-users   # All logged in users
+chmod [who][operators][permissions] <file>
+# who: u-user, g-group, o-others, a-all
+# operators: add(+), remove(-), set(=)
+# permissions: r-read, w-write, x-execute
+
+# chmod u+w,g+wx,o= file.txt
+# add write permission to user
+# add write + execute permission to group
+# set null permission to others
+
+# chmod +x script.sh
+# add execute permission to all
+# equivalent:chmod u+x,g+x,o+x script.sh
+```
+---
+### Ownership control-
+### Viewing ownership:
+### `who`, `read` and `id`
+```bash
+users   
+# displays logged in users name
+
+who
+# detailed version of read
+# displays logged in users name+login_time
+
+w
+# detailed version of who
+# displays logged in users name+login_time+activity
+
 getent passwd  # To see all users
-id <user>      # To see all <user> details
+```
+### `id` (compact who)
+```bash
+id
+# display permissions and groups of all users
+id <user>
+# display permissions and groups of <user>
 ```
 ### `groups`
 ```bash
