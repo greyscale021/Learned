@@ -621,6 +621,7 @@ usermod -d /new/home <user>
 ---
 ## 4. Processes & System Control
 ### Process Control-
+---
 ### `Monitoring`:
 ### `top` (task manager)
 ```bash
@@ -635,223 +636,277 @@ htop
 ```
 ### `ps` (Processes)
 ```bash
-ps      # Shows processes running in the current shell
-ps aux  # a-all user | u-user oriented | x-include ps without terminal (daemons)
-ps -ef  # e- every process | f- full format (normally used in scripting)
+ps      
+# shows processes running in the current shell
+
+ps aux
+# a(all user),u(user oriented)
+# x(include ps without terminal): include daemons
+
+ps -ef  
+# e(every process),f(full format)
+# used in scripting
 ps -u <username>    # List processes for <username>
 ```
 ```bash
-pgrep <process> # PID grep of <process>
+pgrep <process> 
+# PID grep of <process>
 ```
-`Start process with priority`-
+---
+### `Priority`:
 ### `nice`
 ```bash
-nice -n <priority> <command>  # Start a process with higher/lower priority
-# Lower the n value, higher the priority (default n value 0, lowest -20, highest 19)
+nice -n <priority> <command>  
+# start a process with priority
+# n value range(-20 to 19) defines priority
+# lower n means higher priority 
 ```
 ### `renice`
 ```bash
-renice <priority> -p <PID>  # Change priority of an existing process
+renice <priority> -p <PID>  
+# change priority of an existing process
 ```
-
+---
 ### `Ending`:
-### `kill`  (End/terminate process by PID (process id))
+### `kill`(kill by pid)
 ```bash
-kill <PID>      # Kill process by PID
-kill -9 <PID>   # Force kill a process (SIGKILL)
-```
-### `pkill` (Kill processes by name)
-```bash
-pkill <process-name>    # Kill process by name
-```
-### `killall` (Kill all processes by name)
-```bash
-killall <process_name>  # Kill all processes by name
-```
+kill <PID>
+# terminates <PID> proccess
 
-### `Process` (Background/foreground)-
-### `jobs` (Process that was started from the current session)
+kill -9 <PID>
+# sigkill or force kill
+```
+### `pkill`(kill by name)
 ```bash
-jobs # See all the current jobs and job Ids
+pkill <process-name>
+# terminates <process-name> proccess
+```
+### `killall`(kill all by name)
+```bash
+killall <process-name> 
+# terminates all <process-name> proccesses
+```
+---
+### `Background/foreground`:
+### `jobs`
+The active background and suspended tasks managed by the current terminal session
+ 
+```bash
+jobs 
+# displays all current jobs and job Ids
 ```
 ### `bg` (Background)
 ```bash
 bg <job-id>     
-# Send process to background
-# Use ctrl+z to suspend the process and display its job number
+# send process to background
+# ctrl+z to suspend ps and display job number
+
 bg %<job-id>
-# Resumes the execution in the background
+# resume ps in the background
 ```
 ### `fg` (Foreground)
 ```bash
-fg <job_id> # Bring a job to the foreground
+fg <job_id> 
+# bring job to foreground
 ```
-
-## System Control-
-### `Monitoring`-
+---
+### System Control-
+---
+### `Monitoring`:
 ### `uname`
 ```bash
-uname -a    # Display all system information in one line
+uname -a
+# displays all system information
 ```
 ### `uptime`
 ```bash
-uptime       # Display uptime, load average, and number of users
+uptime
+# displays uptime, load average, and number of users
 ```
-### `iostat` (Input-output status)
+### `iostat`(Input-output status)
 ```bash
-iostat       # Show CPU and I/O statistics
+iostat
+# show CPU and I/O statistics
 ```
 ### `free`
 ```bash
-free -h      # Show RAM usage in human-readable format
+free -h
+# show RAM usage in human-readable format
 ```
-### `df` (Disk free) - Disk space of the whole filesystem
+### `df` (Disk free)
 ```bash
-df         # Shows disk space usage of mounted filesystems
-df -h      # Human-readable format
-df -T	   # Type of file system (ext4, xfs, tmpfs)
-df .	   # Info of the disk containing the current folder
-```
-### `du` (Disk usage) - Size of specific files or directories
-```bash
-du               # Shows the disk used by directories(current, subs and . total)
-du -h  <dir>     # Human-readable
-du -sh <dir>     # Total size of a directory
+df
+# shows mounted filesystems disk usage
 
-du -ah <dir>     # Displays sizes for every directory and file
+df -h
+# human-readable format
+df -T
+# type of file system (ext4, xfs, tmpfs)
+df .
+# Info of the disk containing the current folder
 ```
+### `du` (Disk usage)
+```bash
+du <file_or_folder>
+# shows specific files or folders disk usage
+
+du -h <dir>
+# human-readable
+du -sh <dir>
+# -s(summary),-h(human)
+du -ah <dir>
+# -a(all),-h(human)
+```
+Primary difference between df and du is, df uses filesystem metadata, and du scan files live
 ### `lsblk` (List block)
 ```bash
-lsblk       #   List information about all available block devices(hd,ssd,partitions etc)
+lsblk
+# list info of all available block device
+# hd,ssd,partitions etc
 ```
+---
 
-
-### `Managing`-
+### `Managing`:
 ### `systemctl` (System control)
 ```bash
-systemctl status <service_name>   # Check the status of a service
+systemctl status <service_name>
+# check the status of <service_name>
 
-systemctl start <service_name>    # Start a service
-systemctl stop <service_name>     # Stop a service
-systemctl restart <service_name>  # Restart a service
+systemctl start <service>  # start <service>
+systemctl stop <service>   # stop <service>
+systemctl restart <service_name>  # restart <service>
 
-systemctl enable <service_name>   # Enable service to start at boot
-systemctl disable <service_name>  # Disable service from starting at boot
+systemctl enable <service_name>   
+# enable service autostart
+systemctl disable <service_name>  
+# disable service autostart
 ```
 ### `journalctl` (diagnostic tool)
+It's just better "tail -f /var/log/syslog"
 ```bash
-journalctl -u <service>        # logs for a specific service
-journalctl -u <service> -n 5   # last 5 lines
-journalctl -xe                 # most recent logs with context (use after a crash)
-journalctl -f                  # follow logs in real time
-journalctl --since "<time>"    # <time> can be: "10 min ago","2026-03-07 10:30:00", "yesterday"
-journalctl -p err       # Only show errors
+journalctl -f
+# -f(follow),displays real time logs
+journalctl -f -n 4
+# last 4 lines
 
-# When a service fails: 
-# systemctl status <service>  (quick snapshot)
-# journalctl -xe  (full picture)
-# journalctl -u <service> -n 50  (Look into that service)
-# journalctl -b -1  (To look into boot)
+journalctl -u <service>
+# displays logs for a specific service
+journalctl -u <service> -n 5
+# last 5 lines
+
+journalctl --since "<time>"
+# <time>: "10 min ago","2026-03-07 10:30:00", "yesterday"
+
+journalctl -xe
+# -x(explanation),-e(jump to end)
+# useful for troubleshooting crash
+
+journalctl -p err
+# displays only system errors
 ```
 
 ### `mount`
 ```bash
-mount   # List mounted file systems
-mount <source> <target>   # Mount source to target
+mount   
+# list mounted file systems
+
+mount <source> <target>
+# mount <source> to <target>
 ```
 ### `umount` (Unmount)
 ```bash
-umount <directory>   # Unmount the file system from <directory>
+umount <device_path>
+# unmount file system of <device_path>
 ```
-
-### `power`-
+---
+### `power`:
 ### `shutdown`
 ```bash
-shutdown -h now   # Shutdown immediately
-shutdown -h +10   # Shutdown in 10 minutes
-shutdown -r now   # Reboot immediately
-shutdown -r 22:00 # Reboot at 10:00 PM
+shutdown -h now
+# -h(shutdown)
+# shutdown immediately
+shutdown -h +10
+# shutdown in 10 minutes
 
-shutdown -c       # To cancel the schedule
+shutdown -r now
+# -r(reboot)
+# reboot immediately
+shutdown -r 22:00 
+# reboot at 10:00 PM
+
+shutdown -c       
+# to cancel the schedule shutdown
 ```
 ### `reboot`
 ```bash
-reboot      # Reboot immediately
+reboot
+# reboot immediately
 ```
 ### `poweroff`
 ```bash
-poweroff    # Poweroff immediately
+poweroff
+# poweroff immediately
 ```
 ### `halt`
 ```bash
-halt    # Stops the os, not the machine
+halt    
+# os- stops, machine- running
 ```
 
 # 5. SSH (Secure Shell)
 
-SSH lets you securely connect to and control a remote machine(usually a server) over a network. All communication is encrypted.
+### Things to be clear for ssh-
+---
+SSH lets, securely connect and control remote machines or servers. Communications are encrypted.
 
-```bash
-ssh user@host          # Connect to a remote machine
-#  user(a user on the server), host(server ip address)(or domain name)
-ssh user@ip            # Connect using IP address
-ssh -p 2222 user@host  # Connect on a specific port (default is 22)
-exit                   # Close the connection (or Ctrl+D)
-```
+**Login**:
+
+**Password login**: Login using password. Password travels through the network, though encrypted but subceptible to brute force and many risks.
+
+**Key-based login**: Login using key pairs. Generate a key-pair. Private key used by local machine, and public key is used by server, ensures safety.
+
+- **Public key** (`id_ed25519.pub`): Public side of the keypair. (~username)
+- **Private key** (`id_ed25519`): Private side of the keypair. (~password)
 
 ---
-
-## Key Concepts
-
-**Password login**: You type a password every time. It travels over the network encrypted. Risk: brute force, weak passwords, credential leaks.
-
-**Key-based login**: Generate a key pair. The private key stays on your machine. The public key goes on the server. The server locks a challenge with your public key only your private key can unlock it. It's fundamentally safer because no credential crosses.
-
-- **Public key** (`id_ed25519.pub`): Safe to share, goes on the server. (treat it as username)
-- **Private key** (`id_ed25519`): Never leaves the machine. (treat it as password)
-
----
-
-## `~/.ssh/` Directory Structure
+**Directory Structure (~/.ssh/)**:
 
 ```bash
 ~/.ssh/
-|-- id_ed25519          # your private key (chmod 600)
-|-- id_ed25519.pub      # your public key
-|-- authorized_keys     # public keys allowed to log in (lives on the server)
-|-- known_hosts         # servers you've connected to before (fingerprints)
- `- config              # optional: shortcuts for ssh connections
+id_ed25519
+# private key
+id_ed25519.pub
+# public key
 
-# ssh = client tool     sshd = server daemon
+authorized_keys
+# server-side fingerprint
+# keys authorized to log into this machine
+known_hosts
+# client-side fingerprint of servers
+# client authenticating the server
+
+# This two.. prevents man-in-the-middle 
+# by bi-directional authentication
 ```
+---
 
-| File | Lives on | Purpose |
-|---|---|---|
-| `id_ed25519` | Client | private key|
-| `id_ed25519.pub` | Client | public key|
-| `authorized_keys` | Server | Who is allowed to log in |
-| `known_hosts` | Client | Servers you've verified before |
-| `sshd_config` | Server | SSH server configuration |
+**Permissions**: 
 
-> **authorized_keys vs known_hosts:**
-> `authorized_keys` = server authenticating **you**.
-> `known_hosts` = you authenticating the **server** (prevents man-in-the-middle).
-
->**Permissions**: SSH refuses to work if your private key is too open
+SSH refuses keys if private key is too open
 
 ```bash
-chmod 700 ~/.ssh        # Change the permission to user: read, write and execute
-chmod 600 ~/.ssh/id_ed25519     # Change the permission to user: read and write
+chmod 700 ~/.ssh
+# change permisison of .ssh to user(r,w,x)
+chmod 600 ~/.ssh/id_ed25519     
+# change permission of private key to user(r,w)
 ```
-
-If you see `WARNING: UNPROTECTED PRIVATE KEY FILE!` - run the above. SSH protecting itself from exposed private keys is a core feature.
 
 ---
 
-## Full Process (Connecting to a Remote Server)
+### Steps:
+### 1. Server preparation
 
-### Step 1: Prepare the Server
-
+ssh is the client tool and sshd is the server daemon.
 The server needs `sshd` running to accept connections.
 
 ```bash
@@ -861,129 +916,110 @@ sudo systemctl start ssh    # start now
 sudo systemctl status ssh   # confirm status
 ```
 
-### Step 2: Connect With Password (First Time)
+### 2. Connect with username and password
 
 From the server:
 
-Get the server's IP and username from the server machine and check if password authentication is enabled.
+Get the server's ip, username and check if password authentication is enabled.
 
 ```bash
-ip a       # find the 192.168.x.x address
-whoami     # confirm the username
-sudo nano /etc/ssh/sshd_config  # Find "PasswordAuthentication"
+ip a       
+# to check ip
+
+whoami     
+# to check username
+
+sudo nano /etc/ssh/sshd_config  
+# to see "PasswordAuthentication"
 ```
 
 From the client:
 
 ```bash
-ssh username@192.168.x.x
+ssh username@ip
 ```
 
-First connection → server sends fingerprint → you type `yes` → saved to `known_hosts` → enter password(the server machines)
+### 3. Set up key-based login
 
-### Step 3: Set Up Key-Based Login
+From the client:
 
-On the client, generate a key pair:
+Generate key pair.
 
 ```bash
-ssh-keygen -t ed25519   # Press Enter to accept default save location (~/.ssh/id_ed25519)
-# Passphrase is optional but adds an extra layer of protection
-ssh-keygen -t ed25519 -f /path/to/directory/key_name    # -f flag for selecting path manually 
+ssh-keygen -t ed25519
+# generates key of -t(type) ed25519
+
+ssh-keygen -t ed25519 -f /file_path
+# -f(filename) 
 ```
 
-Copy your public key to the server:
+Copy public key to the server:
 
 ```bash
-ssh-copy-id -i ~/path_to_public_key username@192.168.x.x
-# Appends your public key to the server's ~/.ssh/authorized_keys
+ssh-copy-id -i ~/path user@ip
+# copy public key to server
+# registers to servers authorized_keys
 ```
 
-Manual equivalent (if ssh-copy-id isn't available):
+### 4. Secure the server
 
-```bash
-cat ~/.ssh/path_to_public_key | ssh user@host "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
-```
+Once key login works, disable password login
 
-Now connect without password:
-
-```bash
-ssh username@192.168.x.x
-```
-
-### Step 4: Harden the Server
-
-Once key login works, disable password login:
-
+From the server:
 ```bash
 sudo nano /etc/ssh/sshd_config
-```
-
-```
-PasswordAuthentication no    # disable password login
-PubkeyAuthentication yes     # keep key auth on
-PermitRootLogin no           # never allow direct root login
+# opens servers ssh_config file
+# change in the file:
+# PasswordAuthentication no
+# PubkeyAuthentication yes
+# PermitRootLogin no
 ```
 
 ```bash
 sudo systemctl restart sshd
+# restarts sshd
 ```
 
-> Note: Always test in a **new terminal** before closing your current session. If key login fails after disabling passwords, you'll lock yourself out.
+### 5. Connect to server:
 
----
 
-## Using the Server Remotely
 
 ```bash
-# Full interactive session
-ssh username@ip
+ssh user@host
+# connect to remote machine
+# user(a user on the server)
+# host(server ip address or domain name)
 
-# Run a single command without fully logging in
 ssh username@ip "uptime"
-ssh username@ip "df -h"
+# run command(without logging in)
 
-# Watch SSH logs live on the server (tie this together with journalctl)
+ssh -p 2222 user@host
+# connect on a specific port
+# default port: 22
+
+ctrl + D
+# closes the connection
+```
+
+```bash
 journalctl -u ssh -f
+# live ssh logs of the server
 ```
 
 ---
+### Extra: passphrasing, with ssh-agent:
 
-## The `config` File
+`ssh-keygen` asks for a passphrase for keys. With passphrase the private key becomes much more secure.
 
-Instead of typing `ssh user@192.168.x.x` every time:
-
-```bash
-# sudo nano ~/.ssh/config
-Host <name>     # The name you want to select
-    HostName <192.168.x.x>
-    User <username>     # Username
-    Port 22             # Default port
-    IdentityFile ~/path_to_private_key
-```
-
-Now just type:
+Downside, typing it every time, solved with `ssh-agent`:
 
 ```bash
-ssh <name>      # You will be logged in, equivalent to "ssh user@ip"
-```
+eval "$(ssh-agent -s)"
+# start ssh-agent
 
-Essential when managing multiple servers.
-
----
-
-## The Passphrase + `ssh-agent`
-
-`ssh-keygen` asks for a passphrase:
-
-- **Without passphrase:** Anyone who gets your private key file can use it immediately.
-- **With passphrase:** Even if someone steals your private key file, they still need the passphrase to unlock it.
-
-The downside is typing it every time, solved with `ssh-agent`:
-
-```bash
-eval "$(ssh-agent -s)"      # start the agent
-ssh-add ~/.ssh/id_ed25519   # add your key (type passphrase once)
-# now SSH without typing the passphrase again for the rest of the session
+ssh-add ~/path_to_privatekey
+# add your key
+# ssh-agent will auto fill passphrase
 ```
 
 ---
