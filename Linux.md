@@ -1054,8 +1054,26 @@ journalctl -u ssh -f
 # live ssh logs of the server
 ```
 ---
+File transfer:
 
+We can transfer files using [scp](#file-transfer-). 
+```bash
+scp [target] [destination]
 
+scp <file> user@host:/path
+# copy local <file> to remote server
+
+scp user@host:/path/file /path
+# copy remote file to local /path
+
+scp -r folder/ user@host:/path
+# for folders, -r(recursive)
+
+scp -P <port> <file> user@host:/path   
+# -P(port)
+# use <port> fort SSH, a non-default port
+```
+---
 
 ### Common Errors
 
@@ -1142,97 +1160,160 @@ snap remove <package>
 ### Archiving & Compression
 ---
  
-Archiving (bundles files together)<br> 
-Compression (reduces their size) 
+Archiving: bundles files together <br> 
+Compression: reduces their size
 
-### Archiving:
-### `tar` (Tape Archive)- For archiving or compressing a directory
-Flags-
-- c - create / write files into a new .tar
-- x - extract / unpack an archive
-- v - verbose / Print every file name while processing it.
-- t - list contents 
-- f - file name
-- z - gzip / Pipe through gzip(GNU zip)(compress) automatically
+### `tar` (tape archive)
+Used for archiving or compressing a directory.
+
 
 ```bash
-tar -cvf archive.tar folder/        # Create an archive
-tar -xvf archive.tar                # Extract an archive
-tar -czvf archive.tar.gz folder/    # Create a gzip-compressed archive
-tar -xzvf archive.tar.gz            # Extract a gzip-compressed archive
-tar -tf archive.tar                 # List contents without extracting
+tar -tf <archive>.tar
+# -t(list-contents), -f(file-name)
+# list contents without extracting
+
+tar -cvf <archive>.tar <folder>
+# -c(create), -v(verbose)
+# create archive, with verbose(prints steps)
+
+tar -xvf <archive>.tar
+# -x(extract)
+# extract an archive
+
+tar -czvf <archive>.tar.gz <folder>
+# -z(gzip)
+# create gzip-compressed archive
+
+tar -xzvf <archive>.tar.gz
+# extract gzip-compressed archive
 ```
 
-### `gzip`/`gunzip` - For compressing a file
+### `gzip`/`gunzip`
+For compressing a file using GNU zip.
 
 ```bash
-gzip <file>           # Compress file (replaces original with <file.gz>)
-gzip -k <file>        # Compress and keep the original
-gunzip <file>         # Decompress
-gzip -d <file>.gz     # Same as gunzip
+gzip <file>
+# compress <file>
+
+gzip -k <file>
+# -k(keep)
+# compress and also keep the original
+
+gunzip <file>         
+# extract compressed file
+```
+---
+### Networking & File Transfer
+
+---
+### Networking-
+### `ping`
+Used for quickly checking network connectivity and latency.
+```bash
+ping <host>
+# test if a host is reachable
+
+ping -c <n> google.com    
+# -c(count)
+# send exactly <n> number packets
+
+ping -i <n> google.com    
+# -i(interval
+# ping every <n> seconds
+```
+### `curl` (client URL)
+Primarily a data transfer tool. Used to transfer data to or from a network server. Usually used for downloading stuffs.
+```bash
+curl <url>
+# fetch content from a URL
+# outputs to stdout
+
+curl -o <file> <url> 
+# -o(output)
+# saves output as <file>
+
+curl -I <url>   
+# -I(inspect)(rensponse headers)
+# fetch only the HTTP headers
+
+curl -X POST -d "<data>" <url>
+# -X(execute), -d(data)
+# send a POST request with <data>
+# POST method: used to upload data to a server
+
+curl -H "Header-Name: Header-Value" <url>
+# -H(header)(custom request headers)
+# send request with header
+
+curl -s <url>
+# -s(silen)   
+# silent mode, hides the download progress bar
 ```
 
-## Networking & File Transfer
-
-### `ping`  (Useful for quickly checking network connectivity and latency)
-```bash
-ping <host>             # Test if a host is reachable
-ping -c 4 google.com    # Send exactly 4 packets then stop
-ping -i 2 google.com    # Ping every 2 seconds
-```
-### `curl` (Client URL)
-```bash
-curl <url>  # Fetch content from a URL (outputs to stdout)
-curl -o file.html <url> # Save output to a file
-curl -I <url>   # Fetch only the HTTP headers
-curl -X POST -d "data" <url>    # Send a POST request
-curl -H "Authorization: Bearer <token>" <url>  # Send request with a header
-curl -s <url>   # Silent mode (no progress bar)
-```
-> In DevOps used for API calls, health checks, and testing endpoints.
-
-### `wget` (Web Get)
+### `wget` (web Get)
+Primarily a file downloader. Built to fetch and crawl entire websites recursively.
 
 ```bash
-wget <url>                          # Download a file from a URL
-wget -O output.zip <url>            # Save with a specific filename
-wget -c <url>                       # Resume an interrupted download
-wget -q <url>                       # Quiet mode
-wget -r <url>                       # Recursive download (entire site)
+wget <url>
+# download file from <url>
+wget -O <filename> <url>
+# -O(output)
+# download file from <url>, as <filename>
+
+wget -c <url>
+# -c(continue)
+# resume interrupted download
+
+wget -q <url>
+# quiet mode
+
+wget -r <url>
+# recursive download (entire site)
 ```
 
 > `wget` is better for downloading files. `curl` is better for API interaction.
 
 ---
+### File transfer-
 
-### `scp` (Secure Copy — over SSH)
+### `scp` (secure copy)
+Secure copy, using [ssh](#5-ssh-secure-shell).
 
 ```bash
-scp file.txt user@host:/path/       # Copy local file to remote server
-scp user@host:/path/file.txt .      # Copy remote file to current directory
-scp -r folder/ user@host:/path/     # Copy entire directory recursively
-scp -P 2222 file.txt user@host:~/   # Use a non-default SSH port
-```
+scp [target] [destination]
 
-> `scp` uses SSH under the hood — same keys, same port, same security.
+scp <file> user@host:/path
+# copy local <file> to remote server
+scp user@host:/path/file /path
+# copy remote file to local /path
+
+scp -r folder/ user@host:/path
+# for folders, -r(recursive)
+
+scp -P <port> <file> user@host:/path   
+# -P(port)
+# use <port> fort SSH, a non-default port
+```
 
 ---
 
-### `rsync` (Remote Sync)
-Flags -
-- a - archive (preserves permissions, timestamps)
-- v - verbose
-- z - compress
- 
+### `rsync` (remote Sync)
+ rsync transfers pnly the changed files, making it more efficient than scp for repeated syncs.
 
 ```bash
-rsync -av source/ user@host:/dest/      # Sync local folder to remote
-rsync -av user@host:/source/ dest/      # Sync remote folder to local
-rsync -av --delete source/ dest/        # Mirror (delete files not in source)
-rsync -avz source/ user@host:/dest/     # Compress during transfer (-z)
-```
+rsync -av /path user@host:/path
+# -a(archive), -v(verbose)
+# sync local folder to remote
+rsync -av user@host:/source /dest
+# sync remote folder to local
 
-> `rsync` only transfers changed files, making it far more efficient than `scp` for repeated syncs. Standard in DevOps for deployments and backups.
+rsync -av --delete /source /dest
+# mirror, delete files not in source
+
+rsync -avz /source user@host:/dest
+# -z(compress)
+# compress during transfer
+```
 
 ## 7.Shell Redirection & Control Operators
 
