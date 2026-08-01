@@ -378,12 +378,9 @@ tail -f <file>
 ### `grep` (filter)
 ```bash
 grep "<name>" <file>
-# displays content with filter <name> of <file>
-grep -r "<name>" <directory>  # grep of folders
-
-# usecase:
-# grep "error" server.log
-# grabs all error logs
+# displays content with <name> filter of <file>
+grep -r "<name>" <directory>
+# grep of folders
 ```
 ### `ln` (Link)
 ```bash
@@ -1315,122 +1312,196 @@ rsync -avz /source user@host:/dest
 # compress during transfer
 ```
 
-## 7.Shell Redirection & Control Operators
+## 7.Shell redirection & control operators
 
 
-These operators control:
-
-- Data flow (where output goes)
-- Execution flow (when commands run)
-
-Linux commands communicate using:
+Terms to know:
 - stdin  (standard input)
 - stdout (standard output)
 - stderr (standard error)
 
-## Redirection Operators (Data → File)
-
-`>` (Redirect stdout — overwrite)
-```bash
-echo "hello" > file.txt # take the output of echo and overwrite the file.txt
-```
-
-`>>` (Redirect stdout — append)
-```bash
-echo "hello" >> file.txt # Appends output to the end of the file.
-```
-
-`2>` (Redirect stderr)
-```bash
-command 2> file # Redirects error output to a file.
-```
-
-`&>` (Redirect stdout + stderr)
-```bash
-command &> file #Redirects both normal output and errors into one file.
-```
-
-## Pipe Operator (Data → Command)
-
-`|` (Redirect stdout data → Command stdin)
-```bash
-ps aux | grep python 
-# Redirects the stdout of the left to the stdin of the right cmd.
-```
-## Substitution operator (stdout → as command)
-`$()` (Redirect stdout as command)
-```bash
-$(command)      
-# Runs command and substitutes its output directly into the shell line
-# As if user typed it in the shell
-```
-
-## Control Operators (Execution flow)
-
-`&&` (Logical AND)
-```bash
-command1 && command2    # Runs the next command if the previous succeeds
-```
-
-`||` (Logical OR)
-```bash
-command1 || command2    # Runs the next command if the previous fails
-```
-
-`;` (Sequential Execution)
-```bash
-command1 ; comman2  # Runs command sequentially regardless of success or failure.
-```
 ---
-
-## 8. Text Processing — grep, sed, awk
-
-These three tools are the Unix text-processing pipeline. Together they let you search, transform, and extract structured data from logs and config files — a core DevOps skill.
+### Shell redirection
 
 ---
+### Redirection Operators
+Redirect output data (stdout,stderr) to file.
 
-### `grep` — Extended Patterns for Log Work
-
-Basic usage already covered in Section 2. Extended patterns:
-
+`>` (overwrite with stdout)
 ```bash
-grep 'ERROR' app.log                  # Lines containing ERROR
-grep -i 'error' app.log               # Case-insensitive
-grep -n 'ERROR' app.log               # Show line numbers
-grep -c 'ERROR' app.log               # Count matching lines
-grep -v 'DEBUG' app.log               # Invert: lines NOT matching
-grep -A 3 'ERROR' app.log             # Print 3 lines AFTER match
-grep -B 2 'ERROR' app.log             # Print 2 lines BEFORE match
-grep -E 'ERROR|WARN' app.log          # Extended regex (either match)
-grep -r 'AWS_SECRET' /etc/            # Recursive through directories
+echo "hello" > file.txt
+# overwrites file.txt, with stdout
+```
 
-# Real log work:
-grep 'ERROR' /var/log/nginx/error.log | tail -50
-grep -E '^2026-04' app.log | grep 'FAIL'   # Errors in April 2026
+`>>` (append with stdout)
+```bash
+echo "hello" >> file.txt
+# appends to the end of the file, with stdout
+```
+
+`2>` (overwrite with stderr)
+```bash
+command 2> <file> 
+# overwrites <file>, with stderr
+```
+
+`&>` (overwrite with stdout+stderr)
+```bash
+command &> <file> 
+# overwrites <file>, with stdout+stderr
+```
+---
+### Pipe Operator
+Redirect output data (stdout) to stdin of command.
+
+`|` (stdout to command stdin)
+```bash
+ps aux | grep "python"
+# redirects stdout of first to the stdin of second
+# pipe just takes stdout, and use it as stdin
+```
+---
+### Substitution operator 
+Uses stdout as command.
+
+`$()` (stdout as command)
+```bash
+$(<command>)
+# runs <command>, then the stdout
+# is used as new entered command  
 ```
 
 ---
+### Control operators
+Execution flow :)
 
-### `sed` — Stream Editor (Find & Replace)
+---
+`&&` (AND)
+```bash
+command1 && command2
+# run command1 and command2
+# run the later one,only if earlier one succeeds
+```
 
-`sed` reads line-by-line and applies editing commands. Most commonly used for substitution.
+`||` (OR)
+```bash
+command1 || command2
+# run command2, if command1 fails
+# runs the later one,only if earlier one fails
+```
+
+`;` (Sequential)
+```bash
+command1 ; comman2  
+# runs command sequentially
+# regardless of success or failure
+```
+---
+
+## 8. Text Processing
+
+Three popular tools used for linux text processing. (grep, sed, awk)
+
+---
+
+### `grep` (filter)
+```bash
+grep "<name>" <file>
+# displays content with <name> filter of <file>
+grep -r "<name>" <directory>
+# grep of folders
+```
+
+
+Also used for log work.
 
 ```bash
-# Basic substitution: s/find/replace/
-sed 's/old/new/' file.txt             # Replace FIRST match per line
-sed 's/old/new/g' file.txt            # Replace ALL matches per line (global)
-sed 's/old/new/gi' file.txt           # Case-insensitive global replace
+grep 'ERROR' <name.log>
+# filters and prints
+# lines containing ERROR of <name.log>
 
-# In-place editing (edit the file directly):
-sed -i 's/old/new/g' file.txt         # Edit in place
-sed -i.bak 's/old/new/g' file.txt     # Edit in place, keep .bak backup
+grep -r 'name' folder/
+# recursive for directories
 
-# Other uses:
-sed -n '10,20p' file.txt              # Print lines 10-20 only
-sed '/^#/d' config.txt                # Delete comment lines
-sed '/^$/d' file.txt                  # Delete blank lines
+grep -i 'error' <name.log>
+# -i(ignore case)
+# search error case-insensitively
 
-# Real DevOps use: update config during provisioning
+grep -n 'ERROR' <name.log>
+# -n(number)
+# show line numbers
+
+grep -c 'ERROR' <name.log>
+# -c(count)
+# count matching lines
+
+grep -B 2 'ERROR' app.log
+# print 2 lines BEFORE match
+grep -A 3 'ERROR' app.log
+# print 3 lines AFTER match
+```
+
+---
+
+### `sed`(Stream editor)
+
+sed reads and applies editing commands line by line.Commonly used for substitution.
+
+`Using substitution`: s/pattern/replacement/flags
+
+Basic: edits the stream (stdout)
+```bash
+sed 's/old/new/' <file>
+# s(substitution),old(loser),new(winner)
+# replace first match per line and stdout
+
+sed 's/old/new/g' <file>
+# g(global)
+# replace all matches per line
+sed 's/old/new/gi' file.txt
+# i(ignore case)
+# case-insensitive global replace
+```
+In-place: edits the file directly, then stream (stdout)
+```bash
+sed -i 's/old/new/g' <file>         
+# -i(in-place)
+# saves changes fo <file>, then stout
+
+sed -i.bak 's/old/new/g' <file>
+# .bak (backup of <file>)
+# make .bak then edit in-place
+```
+Other uses:
+```bash
+sed -n '5p' <file>
+# n(number)
+# prints line 5
+sed -n '10,20p' <file>
+# print lines 10-20
+```
+`Using address`: /pattern/action
+
+Acts like an if statement. Applies to every line.
+
+```bash
+sed '/^#/d' <file>
+# matches line, starting with '#'
+# d(delete), the matching line.
+
+# used for deleting comments
+
+sed -E '/^(#|$)/d' <file>
+# -E(ERE): using (e.g.:&,|) without "\"
+
+# matches lines, starting with '#'
+# or '$'(blank-line)
+# d(delete), the matching line.
+
+# used for deleting comments and blank lines
+```
+Example usecase:update config during provisioning
+```bash
 sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 ```
 
