@@ -853,22 +853,46 @@ halt
 # os- stops, machine- running
 ```
 
-# 5. SSH (Secure Shell)
+## 5. SSH (Secure Shell)
 
-### Things to be clear for ssh-
+SSH lets, securely connect and control remote machines(servers). Communications are encrypted.
+
 ---
-SSH lets, securely connect and control remote machines or servers. Communications are encrypted.
-
 **Login**:
 
-**Password login**: Login using password. Password travels through the network, though encrypted but subceptible to brute force and many risks.
+**Password-based**: 
 
-**Key-based login**: Login using key pairs. Generate a key-pair. Private key used by local machine, and public key is used by server, ensures safety.
+Login using password. Password travels through the network, though encrypted but risks of brute force and other types of attack.
 
+**Key-based**: 
+
+Login using key pairs. Private half of the key-pair is used by local machine, and public half is used by the server, ensures more safety.
 - **Public key** (`id_ed25519.pub`): Public side of the keypair. (~username)
 - **Private key** (`id_ed25519`): Private side of the keypair. (~password)
 
 ---
+**Ssh handshake**:
+
+Private key never leaves the client. Server makes a challenge with the public key, which can be solved only by the private key.
+
+```
+1. Client, tries to connect the server on port 22
+
+2. Server, sends it's fingerprint
+3. Client, checks known_hosts
+
+4. Client, offers public key
+5. Server, checks authorized_keys
+
+6. Server, using public key, encrypts a challenge 
+7. Client, decrypts it with private key
+
+8. Server, confirms the result, the gives access
+```
+> metaphore: give a padlock to someone, which can be unlocked only by the key of the padlock.
+
+---
+
 **Directory Structure (~/.ssh/)**:
 
 ```bash
@@ -879,8 +903,8 @@ id_ed25519.pub
 # public key
 
 authorized_keys
-# server-side fingerprint
-# keys authorized to log into this machine
+# server-side fingerprint of client keys
+# keys authorized to log into server
 known_hosts
 # client-side fingerprint of servers
 # client authenticating the server
@@ -888,11 +912,11 @@ known_hosts
 # This two.. prevents man-in-the-middle 
 # by bi-directional authentication
 ```
----
 
+---
 **Permissions**: 
 
-SSH refuses keys if private key is too open
+SSH refuses keys if private key is too open.
 
 ```bash
 chmod 700 ~/.ssh
@@ -903,24 +927,30 @@ chmod 600 ~/.ssh/id_ed25519
 
 ---
 
-### Steps:
+### Steps for ssh:
 ### 1. Server preparation
 
-ssh is the client tool and sshd is the server daemon.
+ssh: client tool and sshd: server daemon.
+
 The server needs `sshd` running to accept connections.
 
+From the server:
 ```bash
 sudo apt install openssh-server -y
-sudo systemctl enable ssh   # start on boot
-sudo systemctl start ssh    # start now
-sudo systemctl status ssh   # confirm status
+# install sshd service
+sudo systemctl enable ssh   
+# make ssh start on boot
+sudo systemctl start ssh
+# make ssh start now
+sudo systemctl status ssh
+# confirm status
 ```
 
-### 2. Connect with username and password
+### 2. Login(using password)
 
 From the server:
 
-Get the server's ip, username and check if password authentication is enabled.
+Get the server's ip, username and check password authentication status(needs to be enabled).
 
 ```bash
 ip a       
@@ -943,55 +973,54 @@ ssh username@ip
 
 From the client:
 
-Generate key pair.
+Generate key pair:
 
 ```bash
 ssh-keygen -t ed25519
 # generates key of -t(type) ed25519
+# ed25519 is the modern key type
 
 ssh-keygen -t ed25519 -f /file_path
-# -f(filename) 
+# -f(filename), generates key at /file_path
 ```
 
-Copy public key to the server:
+Copy public key to server:
 
 ```bash
 ssh-copy-id -i ~/path user@ip
+# ~/path of public key (.pub)
 # copy public key to server
-# registers to servers authorized_keys
 ```
 
-### 4. Secure the server
+### 4. Securing server
 
-Once key login works, disable password login
+For security reasons, key-based login is preferred.
+After enabling key based login, disable password login for more security. 
 
 From the server:
+
+Disable password login and restart sshd.
 ```bash
 sudo nano /etc/ssh/sshd_config
-# opens servers ssh_config file
-# change in the file:
-# PasswordAuthentication no
-# PubkeyAuthentication yes
-# PermitRootLogin no
-```
+# change:
+# PasswordAuthentication to 'no'
+# PubkeyAuthentication to 'yes'
+# PermitRootLogin to 'no'
 
-```bash
 sudo systemctl restart sshd
-# restarts sshd
+# restart sshd service
 ```
 
-### 5. Connect to server:
+### 5. Login(using key-pair)
 
-
+From the client:
 
 ```bash
 ssh user@host
-# connect to remote machine
-# user(a user on the server)
-# host(server ip address or domain name)
+# keys will be used for authentiation
 
 ssh username@ip "uptime"
-# run command(without logging in)
+# run single command in the server
 
 ssh -p 2222 user@host
 # connect on a specific port
@@ -1001,119 +1030,122 @@ ctrl + D
 # closes the connection
 ```
 
-```bash
-journalctl -u ssh -f
-# live ssh logs of the server
-```
-
 ---
-### Extra: passphrasing, with ssh-agent:
+### Advanced: 
+---
+Skipping passphrasing:
 
-`ssh-keygen` asks for a passphrase for keys. With passphrase the private key becomes much more secure.
-
-Downside, typing it every time, solved with `ssh-agent`:
+`ssh-keygen` asks for a passphrase for keys. With passphrase the private key becomes much more secure. But we need to enter passphrase everytime we use the private key. We can skip it with ssh-agent.
 
 ```bash
 eval "$(ssh-agent -s)"
 # start ssh-agent
 
-ssh-add ~/path_to_privatekey
-# add your key
-# ssh-agent will auto fill passphrase
+ssh-add ~/path
+# ~/path of private key (keyname or .pem or .key)
+# adds private key to ssh-agent
+# ssh-agent will auto fill passphrase now
 ```
-
 ---
-
-## Key Types
+Server logs:
 
 ```bash
-ssh-keygen -t rsa -b 4096    # rsa (old standard)
-ssh-keygen -t ed25519        # ed25519 (modern)
+journalctl -u ssh -f
+# live ssh logs of the server
 ```
-
-| Type | Key Size | Speed | Security |
-|---|---|---|---|
-| RSA | 4096 bits | Slower | Good |
-| Ed25519 | 256 bits | Much faster | Better |
-
-Ed25519 is based on modern elliptic curve math. A 256-bit Ed25519 key is more secure than a 4096-bit RSA key.
-
 ---
 
-## How the Handshake Works
 
-```
-1. Client connects to server on port 22
-2. Server sends its fingerprint
-   └── In known_hosts? → auto-accept | First time? → you type yes → saved
-3. Client offers public key
-4. Server checks authorized_keys → finds it
-5. Server encrypts a random challenge with your public key → sends it
-6. Client decrypts it with private key → sends back proof
-7. Server confirms → only the real private key could do that → access granted
-```
 
-The private key never crosses the network.
-
----
-
-## Common Errors
+### Common Errors
 
 | Error | Meaning | Fix |
 |---|---|---|
-| `Permission denied (publickey)` | Server doesn't have your public key | Run `ssh-copy-id` |
-| `WARNING: UNPROTECTED PRIVATE KEY FILE` | Key permissions too open | `chmod 600 ~/.ssh/id_ed25519` |
-| `Host key verification failed` | Server fingerprint changed | Verify server, update `known_hosts` |
-| `Connection refused` | sshd not running or wrong port | Check `systemctl status ssh` on server |
-| `Connection timed out` | Firewall blocking port 22 or wrong IP | Check IP and firewall |
-
----
-
-## Why This Matters for DevOps
-
-SSH is the backbone of everything remote:
-
-- Connecting to EC2 instances on AWS
-- Ansible (runs over SSH under the hood)
-- Git over SSH
-- CI/CD pipelines authenticating to servers
-- Port forwarding and tunneling
+| `permission denied (publickey)` | server doesn't have the public key | run `ssh-copy-id -i /public_key user@ip` |
+| `WARNING: UNPROTECTED PRIVATE KEY FILE` | private key permissions too open | `chmod 600 /private_key` |
+| `Host key verification failed` | server fingerprint changed | Verify server, update `known_hosts` |
+| `Connection refused` | server problem | check `systemctl status ssh` on server |
+| `Connection timed out` | firewall problem | check IP and firewall |
 
 ---
 
 ## 6. Package Management & File Transfer
-A package manager handles installing, updating, and removing software on Linux. Different distros use different ones.
-## Package Management-
-### `apt` (Advanced pakage tool)
+A package manager manages softwares on linux (installing, updating, and removing). Different distros use different ones.
+
+---
+### Package Management-
+
+---
+### For debian based distro:
+
+### `apt` (advanced package tool)
+
+Searching:
 ```bash
-apt update              # Refresh the package index (always run before install)
-apt upgrade             # Upgrade(update) all installed packages, using reference of pakage index
-apt full-upgrade        # Upgrade everything that were already fetched using, update, auto remove old packaged if necessary
-apt install <package>   # Install a package
-apt remove <package>    # Remove a package (keeps config files)
-apt purge <package>     # Remove a package and its config files
-apt autoremove          # Remove unused dependencies
-apt search <package>    # Search for a package
-apt show <package>      # Show package details
+apt search <package>
+# search for <package>
+apt show <package>
+# show <package> details
+```
+Installing:
+```bash
+apt install <package>
+# installs <package>
+```
+Updating:
+```bash
+apt update
+# refresh package index 
+# run before installation
+
+apt upgrade
+# update all installed packages
+# uses package index reference
+
+apt full-upgrade
+# enhanced version of upgrade
+# also can remove files if neccessary
+```
+Uninstalling:
+```bash
+apt remove <package>
+# removes <package> 
+# keeps config files
+
+apt purge <package>
+# removes <package>
+# removes config files
+
+apt autoremove
+# remove unused dependencies
+```
+---
+### For cross distro:
+### `snap`
+Snap packages are self-contained so they bundle their own dependencies for cross-distro usecase.
+
+```bash
+snap list
+# list installed snaps
+
+snap install <package>
+# installs snap package
+
+snap refresh
+# update all snap packages
+
+snap remove <package>
+# removes snap package
 ```
 
-### `snap`  (Cross-distro containerized apps) - Snap packages are self-contained. They bundle their own dependencies.
+---
+### Archiving & Compression
+---
+ 
+Archiving (bundles files together)<br> 
+Compression (reduces their size) 
 
-```bash
-snap install <package>      # Install a snap package
-snap remove <package>       # Remove a snap package
-snap list                   # List installed snaps
-snap refresh                # Update all snap packages
-```
-
-## Archiving & Compression
-
-In linux, 
-- Archiving- bundles files together. 
-- Compression- reduces their size. 
-
-`tar.gz` is standard on Linux servers. `zip` is useful for cross-platform sharing.
-
+### Archiving:
 ### `tar` (Tape Archive)- For archiving or compressing a directory
 Flags-
 - c - create / write files into a new .tar
