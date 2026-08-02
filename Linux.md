@@ -1716,54 +1716,91 @@ Find and replace:
 
 ## 10. Cron Jobs
 
-cron is the task scheduler. crond daemon reads a crontab and fires jobs at defined times.
-
----
-
-### Crontab Syntax
-
-```
-# ┌───────── minute       (0-59)
-# │ ┌─────── hour         (0-23)
-# │ │ ┌───── day-of-month (1-31)
-# │ │ │ ┌─── month        (1-12)
-# │ │ │ │ ┌─ day-of-week  (0-7, 0 and 7 = Sunday)
-# │ │ │ │ │
-# * * * * *   command-to-run
-
-30 2 * * *    /usr/bin/backup.sh        # every day at 02:30
-*/5 * * * *   /usr/bin/health_check.sh  # every 5 minutes
-0 0 1 * *     /usr/bin/monthly.sh       # 1st of every month at midnight
-0 9 * * 1-5   /usr/bin/workday.sh       # 9am Mon-Fri
-@reboot       /usr/bin/start_agent.sh   # on every system boot
-```
+cron is the task scheduler. crontab is the config file of cron. crond daemon reads a crontab and fires jobs at defined times.
 
 ---
 
 ### Managing Crontabs
 
 ```bash
-crontab -e              # Edit your crontab (opens in $EDITOR)
-crontab -l              # List your current crontab
-crontab -r              # Remove your crontab (careful!)
-crontab -u <user> -l    # View another user's crontab (as root)
+crontab -e
+# -e (edit) crontab
 
-# System-wide cron directories (run as root):
-ls /etc/cron.d/         # Drop-in cron files
-ls /etc/cron.daily/     # Scripts run daily
-ls /etc/cron.weekly/    # Scripts run weekly
-ls /etc/cron.monthly/   # Scripts run monthly
+crontab -l
+# -l(list) current crontab
+crontab -r              
+# -r(remove) crontab
+
+crontab -u <user> -l    
+# -u(user), -l(list) 
+# view <user>s crontab
+```
+
+Cron directories:
+```
+/etc/cron.d/         
+# default cron folder
+
+/etc/cron.daily/     
+# for daily crons
+
+/etc/cron.weekly/     
+# for weekly crons
+
+/etc/cron.monthly/     
+# for monthly crons
+
+```
+---
+
+### Crontab configuring
+
+Inside the crontab.
+
+cron-job syntax: `* * * * * <file>`
+
+Here:
+```
+no.1 * : minute (0-59)
+no.2 * : hour (0-23)
+no.3 * : day-of-month (1-31)
+no.4 * : month (1-12)
+no.5 * : day-of-week (0-7), 0,7=sunday
+```
+At `m h d m w` \<file\> will run. Just "*" idicates every.
+
+Example:
+```bash
+*/5 * * * * /file.sh
+# "*/" (interval)
+# every 5 minute
+
+30 2 * * * /file.sh
+# every day at 02:30
+
+0 0 1 * * /file.sh
+# every 1st mid night of the month
+
+0 9 * * 1-5 /file.sh
+# every mon-fri at 9am
+
+@reboot /file.sh
+# on every system boot
 ```
 
 ---
 
-### Log Rotation with logrotate
+### Logrotate
 
-`logrotate` is the standard tool for rotating, compressing, and deleting old logs. Cron triggers it daily.
+`logrotate`, a tool for managing old log files (rotating,compressing,deleting). Used with cron.
 
+Example:
 ```bash
-# Config example: /etc/logrotate.d/myapp
-/var/log/myapp/*.log {
+nano /etc/logrotate.d/demo
+```
+Config:
+```bash 
+/var/log/demo/*.log {
     daily           # rotate every day
     rotate 7        # keep 7 old copies
     compress        # gzip old logs
@@ -1771,10 +1808,14 @@ ls /etc/cron.monthly/   # Scripts run monthly
     notifempty      # don't rotate if empty
     create 0644 root root
 }
+```
+Testing logrotate(manually):
+```bash
+sudo logrotate -d /etc/logrotate.d/demo   
+# run
 
-# Test logrotate manually:
-sudo logrotate -d /etc/logrotate.d/myapp   # dry run
-sudo logrotate -f /etc/logrotate.d/myapp   # force rotate now
+sudo logrotate -f /etc/logrotate.d/myapp
+# force rotate now
 ```
 
 ---
