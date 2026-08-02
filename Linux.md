@@ -1443,17 +1443,19 @@ grep -A 3 'ERROR' app.log
 
 ---
 
-### `sed`(Stream editor)
+### `sed`(stream editor)
 
 sed reads and applies editing commands line by line.Commonly used for substitution.
 
-`Using substitution`: s/pattern/replacement/flags
+`Using substitution`: editing the stream (stdout)
 
-Basic: edits the stream (stdout)
+Basic structure: `s/pattern/replacement/flags`
+
+
 ```bash
 sed 's/old/new/' <file>
 # s(substitution),old(loser),new(winner)
-# replace first match per line and stdout
+# replace first match per line of stdout
 
 sed 's/old/new/g' <file>
 # g(global)
@@ -1462,17 +1464,23 @@ sed 's/old/new/gi' file.txt
 # i(ignore case)
 # case-insensitive global replace
 ```
-In-place: edits the file directly, then stream (stdout)
+`In-place`: edits the file directly, then stream (stdout)
+
+Basic structure: `sed -i s/pattern/replacement/flags <file>`
+
 ```bash
 sed -i 's/old/new/g' <file>         
 # -i(in-place)
-# saves changes fo <file>, then stout
+# saves changes fo <file>, then stdout
 
 sed -i.bak 's/old/new/g' <file>
 # .bak (backup of <file>)
 # make .bak then edit in-place
 ```
-Other uses:
+`Numbering`:
+
+Basic structure: `sed -n '<number>' <file>`
+
 ```bash
 sed -n '5p' <file>
 # n(number)
@@ -1480,9 +1488,11 @@ sed -n '5p' <file>
 sed -n '10,20p' <file>
 # print lines 10-20
 ```
-`Using address`: /pattern/action
+`Using address`: 
 
-Acts like an if statement. Applies to every line.
+Basic structure: `/pattern/action`
+
+Acts like an if statement, applies to every line.
 
 ```bash
 sed '/^#/d' <file>
@@ -1495,76 +1505,93 @@ sed -E '/^(#|$)/d' <file>
 # -E(ERE): using (e.g.:&,|) without "\"
 
 # matches lines, starting with '#'
-# or '$'(blank-line)
-# d(delete), the matching line.
+# OR '$'(blank-line)
+# d(delete), the matching line
 
 # used for deleting comments and blank lines
 ```
-Example usecase:update config during provisioning
+`Example usecase`: update config during provisioning
 ```bash
 sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 ```
 
 ---
 
-### `awk` — Pattern & Field Processor
+### `awk`(Aho, Weinberger, Kernighan)
+awk processes text column by column. Each field is `$1`, `$2`, `$3`... `$NF` is the last field. awk is kind of a cli programming language
 
-`awk` processes text column by column. Each field is `$1`, `$2`, `$3`... `$NF` is the last field. Think of it as a mini programming language for tabular data.
+Basic structure: `awk 'pattern { action }' <file>`
+
+`Using action`:
+```bash
+awk '{print $1}' file.txt             
+# print first column of every line
+awk '{print $1, $3}' file.txt
+# print columns 1 and 3
+
+awk '{print NR, $0}' file.txt
+# NR(no. of row):a built-in variable
+# $0(entire current line)
+
+# print line number and full line
+```
+`Field separator` (-F): by default awk assumes columns are separated by blankspaces, but for custom characters (, ; |), it is used.
+
+Basic structure: `awk -F'ch' '{ action }' <file>`
 
 ```bash
-# Basic structure: awk 'pattern { action }' file
+awk -F':' '{print $1}' /etc/passwd
+# separator(:), prints usernames
 
-awk '{print $1}' file.txt             # Print first column of every line
-awk '{print $1, $3}' file.txt         # Print columns 1 and 3
-awk '{print NR, $0}' file.txt         # Print line number + full line
-
-# Field separator (-F):
-awk -F':' '{print $1}' /etc/passwd    # : is separator, prints usernames
-awk -F',' '{print $2}' data.csv       # Parse CSV, print second column
-
-# Pattern matching:
-awk '/ERROR/ {print $0}' app.log      # Print lines matching ERROR
-awk '$3 > 100 {print $0}' data.txt    # Print lines where 3rd col > 100
-
-# Aggregation:
-awk '{sum += $1} END {print sum}' nums.txt  # Sum a column of numbers
-awk 'END {print NR}' file.txt               # Count total lines
-
-# Real log analysis: extract IP and HTTP status from nginx access log
-awk '{print $1, $9}' /var/log/nginx/access.log | grep ' 5'
+awk -F',' '{print $2}' data.csv
+# parse CSV, print second column
 ```
+`Using pattern`:
+```bash
+awk '/ERROR/ {print $0}' app.log      
+# print entire lines 
+# matching 'ERROR'
 
----
+awk '$3 > 100 {print $0}' data.txt
+# print entire lines 
+# where 3rd col is greater than 100
+```
+`Aggregation`: Summarizing data.
 
-### Combining the Three — Log Processing Pipeline
-
-The real power is piping them together:
+Baic structure: `awk '{action1}' END '{action2}' <file>`
+- `END { ... }`: executes after last line of the file is processed
 
 ```bash
-# Count ERROR vs WARN lines:
-grep -E 'ERROR|WARN' app.log | awk '{print $NF}' | sort | uniq -c | sort -rn
+awk '{sum += $1} END {print sum}' nums.txt  
+# sum a column of numbers and prints
 
-# Top 10 IPs hitting your server:
-awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -10
-
-# Failed SSH login attempts by IP:
-grep 'Failed password' /var/log/auth.log | awk '{print $11}' | sort | uniq -c | sort -rn
-
-# Replace a value in every config file in a directory:
-find /etc/myapp -name '*.conf' | xargs sed -i 's/localhost/10.0.0.5/g'
+awk 'END {print NR}' file.txt
+# count total lines
 ```
 
+Advanced structure: `awk '{ array[$key] += $value } END { for (i in array) print i, array[i] }' <file>`
+ 
+- `{ array[$key] += $value }`: loops through every line of <file> using column($key) as the group, and adds up the numbers in column $value 
+- `END { ... }`: executes after last line of the file is processed
+- `for (i in array)`: loops through your grouped keys and prints out the final calculated totals
+
+`Example usecase`: 
+Log analysis: extract IP and HTTP status from nginx access log.
+```bash
+`awk '{print $1, $9}' /var/log/nginx/access.log | grep ' 5'`
+# find web server errors
+# filtering for (error codes,starting with 5)
+# 500(Internal Server Error),  502(Bad Gateway)
+```
 ---
 
 ## 9. Vim Basics
 
-Vim is the editor you'll use when nano isn't available — common on minimal cloud servers and containers. Knowing the basics is non-negotiable for DevOps.
+Vim common on minimal cloud servers and containers than nano. 
 
 ---
 
 ### The Modal System
-
-Vim has modes. This is the thing that trips everyone up. You must know which mode you're in.
 
 | Mode | How to enter | What it does |
 |---|---|---|
@@ -1576,78 +1603,120 @@ Vim has modes. This is the thing that trips everyone up. You must know which mod
 ---
 
 ### Essential Commands
+Opening / saving / quitting:
 
 ```bash
-# Opening / quitting:
-vim file.txt        # Open file
-:q                  # Quit (if no changes)
-:q!                 # Quit WITHOUT saving (force)
-:w                  # Save (write)
-:wq                 # Save and quit
-ZZ                  # Save and quit (Normal mode shortcut)
+vim <file>
+# opens <file> in vim
 
-# Entering Insert mode:
-i                   # Insert BEFORE cursor
-a                   # Insert AFTER cursor
-I                   # Insert at beginning of line
-A                   # Insert at end of line
-o                   # Open new line BELOW and insert
-O                   # Open new line ABOVE and insert
+:q
+# quit (if no changes)
+:q!
+# force quit
 
-# Navigation (Normal mode):
-h j k l             # Left / Down / Up / Right
-w                   # Jump forward one word
-b                   # Jump back one word
-0                   # Start of line
-$                   # End of line
-gg                  # First line of file
-G                   # Last line of file
-:<n>                # Jump to line number (e.g. :42)
-Ctrl+d / Ctrl+u     # Scroll half-page down / up
+:w
+# write (save) file
 
-# Editing (Normal mode):
-x                   # Delete character under cursor
-dd                  # Delete (cut) entire line
-yy                  # Yank (copy) entire line
-p                   # Paste below cursor
-u                   # Undo
-Ctrl+r              # Redo
-cw                  # Change word (delete word, enter Insert mode)
-.                   # Repeat last action
+:wq
+# write and quit
+ZZ
+# save and quit (Normal mode shortcut)
+```
+Entering insert mode:
+```bash
+i
+# insert before cursor
+a
+# insert after cursor
 
-# Search:
-/searchterm         # Search forward
-?searchterm         # Search backward
-n                   # Next match
-N                   # Previous match
+I
+# insert at beginning of line
+A
+# insert at end of line
 
-# Find and replace (Command mode):
-:%s/old/new/g       # Replace all in file
-:%s/old/new/gc      # Replace all, confirm each
-:10,20s/old/new/g   # Replace in lines 10-20 only
+o
+# open new line below and insert
+O
+# open new line above and insert
 ```
 
----
+`Normal mode`
 
-### Survival Workflow
+Navigation:
+```bash
+h j k l
+# left / down / up / right
 
-If you land on a server and need to edit a config:
+w
+# jump forward one word
+b
+# jump back one word
+0
+# jump to start of line
+$
+# jump to end of line
 
+gg                  
+# jump to first line of file
+G                   
+# jump to last line of file
+
+:<n>
+# jump to <n> number line
 ```
-1. vim /etc/ssh/sshd_config   → open the file
-2. /PasswordAuth              → search for the setting
-3. n                          → jump to next match if needed
-4. i                          → enter Insert mode
-5. (make your edit)
-6. Esc                        → back to Normal mode
-7. :wq                        → save and quit
+
+Editing:
+```bash
+x
+# terminates (delete) character under cursor
+
+
+yy
+# yank (copy) entire line
+p                   
+# paste below cursor
+dd                  
+# deletes (cut) entire line
+
+u 
+# undo
+Ctrl+r
+# redo
+.                   
+# repeat last action
+```
+
+Search:
+```bash
+/<searchterm>
+# search forward
+?searchterm
+# search backward
+
+n
+# next match
+N
+# previous match
+```
+
+`Command mode`
+
+Find and replace:
+```bash
+:%s/old/new/g       
+# replace all in file, old(loser) and new(winner)
+:%s/old/new/gc
+# replace all, confirm each
+
+:10,20s/old/new/g   
+# replace in lines 10-20 only
 ```
 
 ---
 
 ## 10. Cron Jobs
 
-`cron` is the Unix task scheduler. A daemon (`crond`) reads a crontab and fires jobs at defined times. Critical in cloud/DevOps for log rotation, backups, health checks, and certificate renewal.
+cron is the task scheduler. crond daemon reads a crontab and fires jobs at defined times.
 
 ---
 
