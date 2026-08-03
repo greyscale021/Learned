@@ -1725,6 +1725,8 @@ cron is the task scheduler. crontab is the config file of cron. crond daemon rea
 ```bash
 crontab -e
 # -e (edit) crontab
+# tmp files for cron
+# can use custom time (* * * * *)
 
 crontab -l
 # -l(list) current crontab
@@ -1734,22 +1736,6 @@ crontab -r
 crontab -u <user> -l    
 # -u(user), -l(list) 
 # view <user>s crontab
-```
-
-Cron directories:
-```
-/etc/cron.d/         
-# default cron folder
-
-/etc/cron.daily/     
-# for daily crons
-
-/etc/cron.weekly/     
-# for weekly crons
-
-/etc/cron.monthly/     
-# for monthly crons
-
 ```
 ---
 
@@ -1790,16 +1776,52 @@ Example:
 
 ---
 
+Cron directories:
+
+`cron.d`: Stores separate files for cron. Use simple file (without .ext) and shebang. Customizable, can use (* * * * *).
+
+```bash
+/etc/cron.d/
+# note: 6 fields before <cmd>
+# * * * * * root <cmd>
+```
+`cron.\<time\>`: For droping files, for specific usecase (".daily", ".weekly" or ".montly"). Use simple file  (without .ext) in  folders for such usecases. Not custimizable, can't use (* * * * *).
+```bash
+/etc/cron.daily/     
+# for daily crons
+
+/etc/cron.weekly/     
+# for weekly crons
+
+/etc/cron.monthly/     
+# for monthly crons
+```
+---
+
+
 ### Logrotate
 
-`logrotate`, a tool for managing old log files (rotating,compressing,deleting). Used with cron.
+A tool for managing old log files (rotating,compressing,deleting). Used with cron.
 
-Example:
+Directories:
+
 ```bash
-nano /etc/logrotate.d/demo
+# Global settings:
+/etc/logrotate.conf 
+# handles default schedules
+# exm: weekly rotations.
+
+# App settings: 
+/etc/logrotate.d/ 
+# for separate text files
+# for tools (Nginx, Apache, etc..)
 ```
+
 Config:
 ```bash 
+nano /etc/logrotate.d/demo
+# to access logrotate.d/ directory
+
 /var/log/demo/*.log {
     daily           # rotate every day
     rotate 7        # keep 7 old copies
@@ -1814,13 +1836,13 @@ Testing logrotate(manually):
 sudo logrotate -d /etc/logrotate.d/demo   
 # run
 
-sudo logrotate -f /etc/logrotate.d/myapp
+sudo logrotate -f /etc/logrotate.d/demo
 # force rotate now
 ```
 
 ---
 
-### Daily Backup Script
+### Backup Script Example
 
 ```bash
 #!/bin/bash
@@ -1829,12 +1851,13 @@ BACKUP_DIR=/var/backups/myapp
 DATE=$(date +%Y-%m-%d)
 mkdir -p $BACKUP_DIR
 tar -czf $BACKUP_DIR/backup-$DATE.tar.gz /var/www/myapp
-find $BACKUP_DIR -name '*.tar.gz' -mtime +30 -delete   # delete backups older than 30 days
+find $BACKUP_DIR -name '*.tar.gz' -mtime +30 -delete
+# delete backups older than 30 days
 echo "Backup completed: $DATE" >> /var/log/backup.log
 
 # Make executable and schedule:
 chmod +x /usr/local/bin/backup.sh
-# Add to crontab: 0 2 * * * /usr/local/bin/backup.sh
+# Add in crontab: 0 2 * * * /usr/local/bin/backup.sh
 ```
 
 ---
@@ -1842,7 +1865,8 @@ chmod +x /usr/local/bin/backup.sh
 ### Output & Debugging
 
 ```bash
-# Redirect cron output to a log (cron sends to mail by default):
+# Redirect cron output to a log
+# cron sends to mail by default:
 0 2 * * * /usr/bin/backup.sh >> /var/log/backup.log 2>&1
 
 # Check crond is running:
@@ -1857,124 +1881,134 @@ journalctl -u cron -f
 
 ## 11. Zombie Processes
 
-A zombie process has finished executing but still has an entry in the process table — it's waiting for its parent to read its exit status. Zombies hold no CPU/memory but do consume a PID slot. Too many can exhaust the PID table and prevent new processes from starting.
+A process that has been finished executing, but still has an entry in the process table because it's waiting for its parent to read its exit status. Though they don't hold any CPU/memory but do consume PID slot. Too many can exhaust PID table and prevent new processes from starting.
 
 ---
 
-### Identifying Zombies
+### Identifying zombie
 
 ```bash
-ps aux | grep 'Z'               # Z in the STAT column = zombie
-ps aux | grep defunct           # Alternative label
-top                             # 'zombie' count shown in the header line
+ps aux | grep 'Z'               
+# check stat column
+# Z means zombie
+
+ps aux | grep defunct           
+# alternative
+
+top
+# to see zombie count
+```
+
+Custom:
+```bash
+ps -eo pid,ppid,stat,cmd | grep ' [Zz]'
 ```
 
 ---
 
-### How to Kill Zombie Processes
+### Killing zombie
 
 ```bash
-# Step 1: Find the zombie and note its PID
-ps aux | grep 'Z'
+# find zombie PID, and it's parent id(PPID)
+ps -eo pid,ppid,stat,cmd | grep ' [Zz]'
 
-# Step 2: Find its parent PID (PPID)
-ps -o pid,ppid,stat,comm | grep Z
-# OR
-cat /proc/<zombie_PID>/status | grep PPid
+# signal the parent to kill child
+kill -SIGCHLD <parent_PID>      
 
-# Step 3: Kill the PARENT — this forces it to clean up
-kill -SIGCHLD <parent_PID>      # Signal parent to reap children
-# If parent ignores it:
-kill -9 <parent_PID>            # Force kill parent (init/systemd will reap orphans)
+# if parent ignores it, kill parent
+kill -9 <parent_PID>
+# zombie, dies too.. I think from sadness..
 
-# Note: You CANNOT kill a zombie with kill -9
-# It's already dead — no running code to receive the signal.
-# Killing the parent is the only fix.
+# Note: can't kill zombie with kill -9
+# well because.. a zombie is already dead?
+# have to kill zombie parent for emotional damage
 
 # Verify:
-ps aux | grep 'Z'
+ps -eo pid,ppid,stat,cmd | grep ' [Zz]'
 ```
 
 ---
 
-### Prevention in Scripts
+### Zombie prevention
+
+Script:
 
 ```bash
 #!/bin/bash
 child_process &
 PID=$!
-wait $PID   # wait() reaps the child immediately on exit
+wait $PID   
+# wait() reaps the child immediately on exit
 ```
 
-> Persistent zombies with no fixable parent: reboot is the last resort.
+> to kill zombies without parents, reboot
 
 ---
 
 ## 12. Networking Commands
 
-`ping`, `curl`, `wget` already covered in Section 6. This section adds the diagnostic and socket-inspection tools critical for cloud and server work.
+`ping`, `curl`, `wget` covered in [Section 6](#6-package-management--file-transfer). This section adds diagnostic and socket-inspection tools.
 
 ---
 
-### `netstat` — Network Statistics (Legacy)
+### `ss` (socket statistics)
 
 ```bash
-netstat -tuln           # TCP/UDP listening ports, numeric addresses
-netstat -tulnp          # Same + which process owns the port (needs sudo)
-netstat -an             # All connections including ESTABLISHED
-netstat -r              # Routing table
+ss -tuln           
+# TCP/UDP listening ports
 
-# Is port 80 open?
-netstat -tulnp | grep ':80'
+ss -tulnp          
+# previous + also shows, owner proccess of port
+
+ss -s
+# -s(summary) statistics
+
+ss -t state established         
+# all established tcp connections
 ```
-
-> On modern systems, `ss` has replaced `netstat`. Install with: `sudo apt install net-tools`
-
----
-
-### `ss` — Socket Statistics (Modern Replacement)
+Usecases:
 
 ```bash
-ss -tuln                # Listening TCP/UDP ports
-ss -tulnp               # Same + process info (needs sudo)
-ss -s                   # Summary statistics
-ss -t state established # All established TCP connections
+# what's on a specific port:
+ss -tulnp | grep ':22'  
+# who's listening on ssh
+ss -tulnp | grep ':80'  
+# who's listening on http
 
-# What's on a specific port:
-ss -tulnp | grep ':22'  # Who's listening on SSH
-ss -tulnp | grep ':80'  # Who's listening on HTTP
-
-# Connections to a specific remote IP:
+# connections to a specific remote ip:
 ss -t dst 10.0.0.5
 
-# Count established connections:
+# count established connections:
 ss -t state established | wc -l
 ```
 
 ---
 
-### `traceroute` — Trace Network Path
+### `traceroute` (trace network path)
 
-Shows the path packets take to reach a host and latency at each hop. Critical for diagnosing connectivity issues between AWS regions, VPCs, or external services.
+Shows the path packets take to reach a host and latency at each hop. Used for diagnosing connectivity issues between services.
 
 ```bash
-traceroute google.com           # Trace route to google.com
-traceroute -n google.com        # Numeric only (no DNS, faster)
-traceroute -m 15 google.com     # Limit to 15 hops max
-tracepath google.com            # Alternative (may be available instead)
+traceroute google.com           
+# trace route to google.com
 
-# Reading output:
-# Each line = one hop (router)
-# Three latency values per hop (three probes)
-# * * * = hop not responding (firewall dropping ICMP)
+traceroute -n google.com        
+# -n(numeric) only, no dns
+traceroute -m 15 google.com     
+# limit to 15 hops
+tracepath google.com
+# alternative, when tracepath isn't available
 ```
+Reading output:
+
+Each line, one hop (router). Three latency values per hop (three probes). \* * * means hop not responding (firewall dropping ICMP)
 
 ---
 
 ### DNS & IP Utilities
 
 ```bash
-# Install if needed: sudo apt install dnsutils net-tools
+# Install "dnsutils net-tools" if needed
 
 nslookup google.com     # Query DNS for a hostname
 dig google.com          # Detailed DNS query
@@ -1985,18 +2019,4 @@ ip a                    # Show all network interfaces and IPs
 ip r                    # Show routing table
 hostname -I             # Print all local IPs
 ```
-
 ---
-
-### Quick Reference
-
-| Command | What it tells you |
-|---|---|
-| `ss -tulnp` | Open ports and which process owns them |
-| `ss -t state established` | All active TCP connections |
-| `netstat -r` | Routing table / default gateway |
-| `traceroute <host>` | Network path + latency at each hop |
-| `ping -c 4 <host>` | Basic reachability + round-trip latency |
-| `curl -I <url>` | HTTP response headers / health check |
-| `dig +short <host>` | Quick DNS lookup |
-| `ip a` | All interfaces and their IPs |
